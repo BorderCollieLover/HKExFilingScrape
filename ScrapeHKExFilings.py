@@ -9,13 +9,24 @@ import os
 import pandas as pd
 from urllib.error import URLError, HTTPError
 from operator import itemgetter
-import FileToolsModule as FTM
 import locale
 import shutil
-import HKExBuybackSummary as HKBuyback
 from glob import glob
 
+import FileToolsModule as FTM
+import HKExBuybackSummary as HKBuyback
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
+HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
+FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
+FilingsByFundDir = HKFilingsDir + "FilingsByFund\\"
+BackupDir =  HKFilingsDir + "Backup\\"
+DailyFilingsDir = HKFilingsDir + "DailyFilings\\"
+
+FundsList = HKFilingsDir + "Funds.csv"
+ScrapedFormsList = HKFilingsDir + "FullScrapingList.csv"
+HistoricalForms2ScrapeList = HKFilingsDir + "HistoricalList2Scrape.csv"
+ErrorLog = HKFilingsDir + "Log.csv"
 
 #Filings b4 2017.07.02 has an extra "filing" in its url
 ##B4 2017.07.02: http://sdinotice.hkex.com.hk/filing/di/NSAllFormDateList.aspx?sa1=da&scsd=08/04/2015&sced=08/04/2016&src=MAIN&lang=EN
@@ -33,7 +44,6 @@ HKFunds = ["Fuhui Capital Investment Limited",
            "Keytone Capital Partners",
            "Keytone Investment Group Ltd",
            "Beijing Jiankun Investment Group Co",
-           'Tsinghua Unigroup Co',
            'DT Capital Management Co',
            "Spring Asset Management Limited",
            "Wykeham Capital Limited",
@@ -53,7 +63,7 @@ HKFunds = ["Fuhui Capital Investment Limited",
 
 def SaveFundsFile():
     CleanedFundNames = [(FTM.CleanString(line),) for line in HKFunds]
-    FTM.SafeAddData("/Users/Shared/HKEx/Funds.csv", CleanedFundNames)
+    FTM.SafeAddData(FundsList, CleanedFundNames)
     return
 SaveFundsFile()
 
@@ -75,7 +85,7 @@ def Fundname2FundFileName(fund):
     return(fundnameStr)
 
 def UpdateFundsfromTickerFile(funds, ticker, lazyUpdate=True):
-    tickerfile = "/Users/Shared/HKEx/FilingsbyTicker/"+ticker+".csv"
+    tickerfile = FilingsByTickerDir+ticker+".csv"
     if os.path.isfile(tickerfile):
         tickerfiletime = os.path.getmtime(tickerfile)
         with open(tickerfile, encoding='utf-8') as f:
@@ -86,7 +96,7 @@ def UpdateFundsfromTickerFile(funds, ticker, lazyUpdate=True):
     for fund in funds:
         #print(fund)
         fundnameStr = Fundname2FundFileName(fund)
-        fundfile = "/Users/Shared/HKEx/FilingsByFund/"+fundnameStr+".csv"
+        fundfile = FilingsByFundDir+fundnameStr+".csv"
         if os.path.isfile(fundfile):
             if lazyUpdate:
                 fundfiletime = os.path.getmtime(tickerfile)
@@ -98,7 +108,7 @@ def UpdateFundsfromTickerFile(funds, ticker, lazyUpdate=True):
 
 def UpdateOneFundfromData(fund, data):
     fundnameStr = Fundname2FundFileName(fund)
-    fundfile = "/Users/Shared/HKEx/FilingsByFund/" + fundnameStr + ".csv"
+    fundfile = FilingsByFundDir + fundnameStr + ".csv"
     fundData = ExtractFundFilingData(fund, data)
     FTM.SafeAddData(fundfile, fundData, sortKeys=[1])
     return
@@ -109,10 +119,10 @@ def UpdateFundsfromData(funds, data):
     return
 
 def InitializeFundFilings():
-    fundfile = "/Users/Shared/HKEx/Funds.csv"
-    if os.path.isfile(fundfile):
+    #fundfile = "/Users/Shared/HKEx/Funds.csv"
+    if os.path.isfile(FundsList):
         try:
-            with open(fundfile, encoding='utf-8') as f:
+            with open(FundsList, encoding='utf-8') as f:
                 funds = [tuple(line) for line in csv.reader(f)]
         except Exception as e:
             print(e)
@@ -122,7 +132,7 @@ def InitializeFundFilings():
     funds = [line[0] for line in funds]
     newfunds = []
     for fund in funds:
-        if not os.path.isfile("/Users/Shared/HKEx/FilingsbyFund/"+ Fundname2FundFileName(fund) + ".csv"):
+        if not os.path.isfile(FilingsByFundDir+ Fundname2FundFileName(fund) + ".csv"):
             newfunds += [fund]
 
     if len(newfunds)<1:
@@ -130,7 +140,7 @@ def InitializeFundFilings():
     else:
         funds = newfunds
 
-    tickerfiles = glob("/Users/Shared/HKEx/FilingsbyTicker/*.csv")
+    tickerfiles = glob(FilingsByTickerDir+ "*.csv")
     tickers = [os.path.splitext(os.path.basename(tickerfile))[0] for tickerfile in tickerfiles]
     print(str(len(funds)) + " funds to initialize")
     print(str(len(tickers)) + " stocks with filings")
@@ -139,10 +149,9 @@ def InitializeFundFilings():
     return
 
 def DailyUpdateFunds(data):
-    fundfile = "/Users/Shared/HKEx/Funds.csv"
-    if os.path.isfile(fundfile):
+    if os.path.isfile(FundsList):
         try:
-            with open(fundfile, encoding='utf-8') as f:
+            with open(FundsList, encoding='utf-8') as f:
                 funds = [tuple(line) for line in csv.reader(f)]
         except Exception as e:
             print(e)
@@ -155,22 +164,18 @@ def DailyUpdateFunds(data):
     return
 
 
-
-
 def BackupImportantFiles():
-    shutil.copy2("/Users/Shared/HKEx/FullScrapingList.csv", "/Users/Shared/HKEx/Backup/")
-    shutil.copy2("/Users/Shared/HKEx/HistoricalList2Scrape.csv", "/Users/Shared/HKEx/Backup/")
-    #shutil.copy2("/Users/Shared/HKEx/ScrapedIDs.csv", "/Users/Shared/HKEx/Backup/")
+    shutil.copy2(ScrapedFormsList, BackupDir)
+    shutil.copy2(HistoricalForms2ScrapeList, BackupDir)
 
 
 def LogErrorUrl(url):
-    errorLogFile = "/Users/Shared/HKEx/ErrorLogs.csv"
-    FTM.AddString2File(errorLogFile, url)
+    FTM.AddString2File(ErrorLog, url)
     return
 
 
 def SaveFilingData (stockCode, eventDt, filingCode, investorName, eventInfo, aevtSummary, bevtSummary, filingurl, filingDt):
-    tgtFile = "/Users/Shared/HKEx/FilingsByTicker/" + str(stockCode) + ".csv"
+    tgtFile = FilingsByTickerDir + str(stockCode) + ".csv"
     newData = [( eventDt, filingCode, investorName, str(eventInfo[0]), eventInfo[3], str(eventInfo[4]), str(eventInfo[5]), str(eventInfo[6]), str(eventInfo[7]), str(aevtSummary[0]), str(aevtSummary[1]), str(aevtSummary[2]), str(aevtSummary[3]), str(bevtSummary[0]),str(bevtSummary[1]),str(bevtSummary[2]),str(bevtSummary[3]),filingurl, filingDt),]
 
     if os.path.isfile(tgtFile):
@@ -191,12 +196,11 @@ def SaveFilingData (stockCode, eventDt, filingCode, investorName, eventInfo, aev
 
 
 def RemovedScrapedFilings(filinglist):
-    curFilingFile = "/Users/Shared/HKEx/FullScrapingList.csv"
     outputList = []
 
-    if os.path.isfile(curFilingFile):
+    if os.path.isfile(ScrapedFormsList):
         try:
-            with open(curFilingFile, encoding='utf-8') as f:
+            with open(ScrapedFormsList, encoding='utf-8') as f:
                 tmpData = [tuple(line) for line in csv.reader(f)]
         except Exception as e:
             print(e)
@@ -216,15 +220,15 @@ def CheckFilingListAgainstErrorLog(filinglist):
     if (filinglist is None) or (len(filinglist)<1):
         return None
 
-    ScrapedFormIDFile = "/Users/Shared/HKEx/Errorlogs.csv"
-    IDFileExists = os.path.isfile(ScrapedFormIDFile)
+    
+    IDFileExists = os.path.isfile(ErrorLog)
     if IDFileExists:
         ScrapedIDs = []
         try:
-            with open(ScrapedFormIDFile, 'r+') as csvfile:
+            with open(ErrorLog, 'r+') as csvfile:
                 IDlines = [tuple(line) for line in csv.reader(csvfile)]
             ScrapedIDs = sorted(list(set([line[0] for line in IDlines])))
-            with open(ScrapedFormIDFile, 'w', encoding='utf-8') as csvfile:
+            with open(ErrorLog, 'w', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
                 for ticker in ScrapedIDs:
                     writer.writerow([ticker])
@@ -596,10 +600,10 @@ def ScrapeHKExFilingsbyDates(startDt, endDt):
     (scrapedResults, residualList)  = ScrapeHKExFilingsfromList(filinglist)
 
     #4. Update FullScrapingLists.csv and HistoricalList2Scrape.csv
-    FTM.SafeAddData("/Users/Shared/HKEx/FullScrapingList.csv", filinglist)
+    FTM.SafeAddData(ScrapedFormsList, filinglist)
 
     if (residualList is not None) and (len(residualList)>0):
-        FTM.SafeAddData("/Users/Shared/HKEx/HistoricalList2Scrape.csv", residualList)
+        FTM.SafeAddData(HistoricalForms2ScrapeList, residualList)
         UpdateFilingList2Scrape()
 
     return(scrapedResults)
@@ -608,7 +612,7 @@ def SaveDailyFilings(outputData):
     if (outputData is None) or (len(outputData)<1):
         return
 
-    outputfile = '/Users/shared/HKEx/DailyFilings/' + datetime.date.today().strftime('%Y%m%d') + '.csv'
+    outputfile = DailyFilingsDir + datetime.date.today().strftime('%Y%m%d') + '.csv'
     saveData = []
     for line in outputData:
         saveData +=[(line[0], line[1], line[2], line[3], line[4][0],  line[4][3], line[4][4], line[4][5], line[4][6], line[4][7], line[5][0], line[5][1], line[5][2], line[5][3], line[6][0], line[6][1], line[6][2], line[6][3],line[7],line[8], )]
@@ -630,7 +634,7 @@ def DailyScrapeHKExFilings():
     return(outputData)
 
 def ScrapeHistoricalHKExFilings(targetNum=5000):
-    historicalListFile = "/Users/Shared/HKEx/HistoricalList2Scrape.csv"
+    historicalListFile = HistoricalForms2ScrapeList
     if os.path.isfile(historicalListFile):
         try:
             with open(historicalListFile, mode='r', encoding='utf-8') as inhistfile:
@@ -650,13 +654,13 @@ def ScrapeHistoricalHKExFilings(targetNum=5000):
         print(str(len(remainingList)) + ' lines not processed this time.')
         if (tmpresidualList is not None) and (len(tmpresidualList) > 0):
             remainingList += tmpresidualList
-        FTM.SafeSaveData("/Users/Shared/HKEx/HistoricalList2Scrape.csv", remainingList)
+        FTM.SafeSaveData(HistoricalForms2ScrapeList, remainingList)
         UpdateFilingList2Scrape()
 
     return
 
 def UpdateFilingList2Scrape():
-    historicalListFile = "/Users/Shared/HKEx/HistoricalList2Scrape.csv"
+    historicalListFile = HistoricalForms2ScrapeList
     try:
         with open(historicalListFile, mode='r', encoding='utf-8') as inhistfile:
             histList = [tuple(line)+ ((datetime.datetime.strptime(line[2], "%d/%m/%Y")).strftime("%Y/%m/%d"),) for line in csv.reader(inhistfile)]
@@ -671,7 +675,7 @@ def UpdateFilingList2Scrape():
     return
 
 def HKExFilingDailyBatch():
-    tmpfile = '/Users/shared/HKEx/DailyFilings/' + datetime.date.today().strftime('%Y%m%d') + '.csv'
+    tmpfile = DailyFilingsDir + datetime.date.today().strftime('%Y%m%d') + '.csv'
     if os.path.isfile(tmpfile):
         return
 
@@ -711,7 +715,7 @@ InitializeFundFilings()
 # The FullScrapingList is subsequently updated in daily runs
 def ScrapeHistoricalFilingList():
     scrapingdts = pd.bdate_range(start=datetime.datetime.strptime("01/04/2003", "%d/%m/%Y"), end=datetime.datetime.now())
-    tgtFile = "/Users/Shared/HKEx/FullScrapingList.csv"
+    tgtFile = ScrapedFormsList
     j = len(scrapingdts)-1
     i = max(j-10, 0)
     while (i!=0):
