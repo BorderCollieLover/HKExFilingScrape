@@ -13,11 +13,13 @@ import locale
 import shutil
 from glob import glob
 
+import sys
+sys.path.append("c:\\users\\mtang\\Documents\\Research\\HKExFilingScrape\\")
 import FileToolsModule as FTM
-import HKExBuybackSummary as HKBuyback
+from HKExBuybackSummary import HKFilingsDir, DownloadBuyBackReports, UpdateAnnualBuyBackData, BuybackSummaryfromFile
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
-HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
+#HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 FilingsByFundDir = HKFilingsDir + "FilingsByFund\\"
 BackupDir =  HKFilingsDir + "Backup\\"
@@ -165,8 +167,10 @@ def DailyUpdateFunds(data):
 
 
 def BackupImportantFiles():
-    shutil.copy2(ScrapedFormsList, BackupDir)
-    shutil.copy2(HistoricalForms2ScrapeList, BackupDir)
+    if os.isfile(ScrapedFormsList):
+        shutil.copy2(ScrapedFormsList, BackupDir)
+    if os.isfile(HistoricalForms2ScrapeList):
+        shutil.copy2(HistoricalForms2ScrapeList, BackupDir)
 
 
 def LogErrorUrl(url):
@@ -680,9 +684,13 @@ def HKExFilingDailyBatch():
         return
 
     try:
-        HKBuyback.BuybackSnapshot(60)
+        DownloadBuyBackReports()
+        UpdateAnnualBuyBackData()
+        BuybackSummaryfromFile()
     except Exception as e:
         print(e)
+        
+    
     dailySnapshot = DailyScrapeHKExFilings()
 
 
@@ -694,8 +702,11 @@ def HKExFilingDailyBatch():
         print(e)
     return
 
-HKExFilingDailyBatch()
-InitializeFundFilings()
+
+#DailyScrapeHKExFilings()
+
+#HKExFilingDailyBatch()
+#InitializeFundFilings()
 
 
 
@@ -724,7 +735,7 @@ def ScrapeHistoricalFilingList():
         scrapelist += RetrieveFilingsList("http://sdinotice.hkex.com.hk/di/NSAllFormDateList.aspx?sa1=da&scsd=",
                                          scrapingdts[i], scrapingdts[j])
         #Add scrapelist to tgtFile
-        #FTM.SafeSaveData(tgtFile,scrapelist)
+        FTM.SafeAddData(tgtFile,scrapelist)
         j -= 10
         i = max(j-10, 0)
     return()
