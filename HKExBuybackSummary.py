@@ -27,7 +27,7 @@ rptName = '/Users/shared/HKEx/Repurchase/20111216.xls'
 rptName = '/Users/shared/HKEx/Repurchase/20120102.xls'
 rptName = '/Users/shared/HKEx/Repurchase/20080822.xls'
 rptName = 'c:\\users\\mtang\\HKEx\\Repurchase\\20210603.xls'
-HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
+HKFilingsDir = "X:\\HKExFilings\\"
 
 BuyBackSummaryFile = HKFilingsDir + "BuybackSummary.csv"
 BuyBackSnapshotFile = HKFilingsDir + "BuybackSnapshot.csv"
