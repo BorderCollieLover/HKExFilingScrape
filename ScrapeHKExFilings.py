@@ -14,7 +14,7 @@ import shutil
 from glob import glob
 
 import sys
-sys.path.append("c:\\users\\mtang\\Documents\\Research\\HKExFilingScrape\\")
+#sys.path.append("c:\\users\\mtang\\Documents\\Research\\HKExFilingScrape\\")
 import FileToolsModule as FTM
 from HKExBuybackSummary import HKFilingsDir, DownloadBuyBackReports, UpdateAnnualBuyBackData, BuybackSummaryfromFile
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
