@@ -39,11 +39,11 @@ def Deduplicate(datafile):
 def AddString2File(filename, datastr):
     fileExists = os.path.isfile(filename)
     if fileExists:
-        with open(filename, 'a+') as f:
+        with open(filename, 'a+',  newline='') as f:
             f.write(datastr)
             f.write('\n')
     else:
-        with open(filename, 'w') as f:
+        with open(filename, 'w',  newline='') as f:
             f.write(datastr)
             f.write('\n')
     return

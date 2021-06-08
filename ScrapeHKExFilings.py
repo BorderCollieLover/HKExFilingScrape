@@ -16,10 +16,11 @@ from glob import glob
 import sys
 #sys.path.append("c:\\users\\mtang\\Documents\\Research\\HKExFilingScrape\\")
 import FileToolsModule as FTM
-from HKExBuybackSummary import HKFilingsDir, DownloadBuyBackReports, UpdateAnnualBuyBackData, BuybackSummaryfromFile
+#from HKExBuybackSummary import HKFilingsDir, DownloadBuyBackReports, UpdateAnnualBuyBackData, BuybackSummaryfromFile
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 #HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
+HKFilingsDir = "X:\\HKExFilings\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 FilingsByFundDir = HKFilingsDir + "FilingsByFund\\"
 BackupDir =  HKFilingsDir + "Backup\\"
@@ -232,7 +233,7 @@ def CheckFilingListAgainstErrorLog(filinglist):
             with open(ErrorLog, 'r+') as csvfile:
                 IDlines = [tuple(line) for line in csv.reader(csvfile)]
             ScrapedIDs = sorted(list(set([line[0] for line in IDlines])))
-            with open(ErrorLog, 'w', encoding='utf-8') as csvfile:
+            with open(ErrorLog, 'w', encoding='utf-8', newline='') as csvfile:
                 writer = csv.writer(csvfile)
                 for ticker in ScrapedIDs:
                     writer.writerow([ticker])
@@ -639,6 +640,7 @@ def DailyScrapeHKExFilings():
 
 def ScrapeHistoricalHKExFilings(targetNum=5000):
     historicalListFile = HistoricalForms2ScrapeList
+    #print('here')
     if os.path.isfile(historicalListFile):
         try:
             with open(historicalListFile, mode='r', encoding='utf-8') as inhistfile:
@@ -649,8 +651,10 @@ def ScrapeHistoricalHKExFilings(targetNum=5000):
         print(str(len(histList)) + " in list.")
     else:
         return
+    
+    #print('here')
 
-    histList = CheckFilingListAgainstErrorLog(histList)
+    #histList = CheckFilingListAgainstErrorLog(histList)
     if (len(histList)>0):
         (tmpResults,  tmpresidualList) = ScrapeHKExFilingsfromList(histList[:min(targetNum, len(histList))])
         remainingList = histList[min(targetNum, len(histList)):]
@@ -662,6 +666,8 @@ def ScrapeHistoricalHKExFilings(targetNum=5000):
         UpdateFilingList2Scrape()
 
     return
+
+
 
 def UpdateFilingList2Scrape():
     historicalListFile = HistoricalForms2ScrapeList
@@ -683,13 +689,15 @@ def HKExFilingDailyBatch():
     if os.path.isfile(tmpfile):
         return
 
-    try:
-        DownloadBuyBackReports()
-        UpdateAnnualBuyBackData()
-        BuybackSummaryfromFile()
-    except Exception as e:
-        print(e)
-        
+# =============================================================================
+#     try:
+#         DownloadBuyBackReports()
+#         UpdateAnnualBuyBackData()
+#         BuybackSummaryfromFile()
+#     except Exception as e:
+#         print(e)
+#         
+# =============================================================================
     
     dailySnapshot = DailyScrapeHKExFilings()
 
@@ -707,6 +715,16 @@ def HKExFilingDailyBatch():
 
 #HKExFilingDailyBatch()
 #InitializeFundFilings()
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
+#ScrapeHistoricalHKExFilings(100000)
 
 
 
