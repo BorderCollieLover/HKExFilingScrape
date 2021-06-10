@@ -168,9 +168,9 @@ def DailyUpdateFunds(data):
 
 
 def BackupImportantFiles():
-    if os.isfile(ScrapedFormsList):
+    if os.path.isfile(ScrapedFormsList):
         shutil.copy2(ScrapedFormsList, BackupDir)
-    if os.isfile(HistoricalForms2ScrapeList):
+    if os.path.isfile(HistoricalForms2ScrapeList):
         shutil.copy2(HistoricalForms2ScrapeList, BackupDir)
 
 
@@ -711,20 +711,21 @@ def HKExFilingDailyBatch():
     return
 
 
-#DailyScrapeHKExFilings()
 
 #HKExFilingDailyBatch()
 #InitializeFundFilings()
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
-#ScrapeHistoricalHKExFilings(100000)
+for i in range(5):
+    j = 10000
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
+    ScrapeHistoricalHKExFilings(10000)
 
 
 
