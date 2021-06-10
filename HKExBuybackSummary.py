@@ -30,8 +30,10 @@ rptName = 'c:\\users\\mtang\\HKEx\\Repurchase\\20210603.xls'
 HKFilingsDir = "X:\\HKExFilings\\"
 
 BuyBackSummaryFile = HKFilingsDir + "BuybackSummary.csv"
+AllBuyBackSummaryFile = HKFilingsDir + "AllBuybackSummary.csv"
 BuyBackSnapshotFile = HKFilingsDir + "BuybackSnapshot.csv"
 BuybackTickerFile = HKFilingsDir + "Snapshots\\tickers.csv"
+
 
 
 
@@ -258,6 +260,18 @@ def UpdateAnnualBuyBackData():
     return # end
 
 
+def UpdateAllBuyBackData():
+    scrapingdts = pd.bdate_range(start=datetime.datetime(2003,1,1), end=datetime.datetime.now()).tolist()
+    x = []    
+    for scrapingdt in scrapingdts:
+        tmp = ReadOneReport(HKFilingsDir + "Repurchase\\"+scrapingdt.strftime('%Y%m%d')+'.xls')
+        x += tmp
+        # DumpTable(x, BuybackSummaryFile)
+    for scrapingdt in scrapingdts:
+        tmp = ReadOneReport(HKFilingsDir + "GEMRepurchase\\"+scrapingdt.strftime('%Y%m%d')+'.xls')
+        x += tmp
+    DumpTable(x, AllBuyBackSummaryFile)
+    return # end
 
 def BuybackSummaryfromFile(filename=BuyBackSummaryFile):
     BuybackHeader = ['Company', 'Ticker', 'Stock Type', 'Trade Date', 'Number of Shares', 'Last Buyback High Price', 'Last Buyback Low Price', 'Last Buyback Total',
@@ -294,3 +308,4 @@ def BuybackSummaryfromFile(filename=BuyBackSummaryFile):
 DownloadBuyBackReports()
 UpdateAnnualBuyBackData()
 BuybackSummaryfromFile()
+#UpdateAllBuyBackData()
