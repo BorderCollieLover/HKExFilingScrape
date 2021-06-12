@@ -87,6 +87,17 @@ def Fundname2FundFileName(fund):
     fundnameStr = p.sub('', fundnameStr)
     return(fundnameStr)
 
+def CleanFundNameStr (text_str):
+    text_str = text_str.replace(".", "")
+    text_str = re.sub('\s+', ' ', text_str)
+    text_str = text_str.lower()
+    text_str = re.sub('limited', 'ltd', text_str)
+    
+    return(text_str)
+    
+    
+    
+
 def UpdateFundsfromTickerFile(funds, ticker, lazyUpdate=True):
     tickerfile = FilingsByTickerDir+ticker+".csv"
     if os.path.isfile(tickerfile):
@@ -546,8 +557,8 @@ def ScrapeOneHKExFiling(formID, filingurl, filingDtIn, filingCode, longshortCode
     #print(postEventSummary)
     aevtSummary = ScrapePositionSummary(postEventSummary)
 
-    SaveFilingData (stockCode, eventDt, filingCode, investorName, eventInfo, aevtSummary,  bevtSummary, filingurl.strip(), filingDt)
-    return ([(stockCode, eventDt, filingCode, investorName, eventInfo, aevtSummary,  bevtSummary, filingurl.strip(), filingDt)])
+    SaveFilingData (stockCode, eventDt, filingCode, CleanFundNameStr(investorName), eventInfo, aevtSummary,  bevtSummary, filingurl.strip(), filingDt)
+    return ([(stockCode, eventDt, filingCode, CleanFundNameStr(investorName), eventInfo, aevtSummary,  bevtSummary, filingurl.strip(), filingDt)])
 
 def ScrapeHKExFilingsfromList(targetList):
     scrapeResults = []
@@ -714,18 +725,20 @@ def HKExFilingDailyBatch():
 
 #HKExFilingDailyBatch()
 #InitializeFundFilings()
-for i in range(5):
-    j = 10000
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
-    ScrapeHistoricalHKExFilings(10000)
+# =============================================================================
+# for i in range(5):
+#     j = 10000
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+#     ScrapeHistoricalHKExFilings(10000)
+# =============================================================================
 
 
 
