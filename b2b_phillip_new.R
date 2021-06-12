@@ -34,7 +34,12 @@ contract_note_contents <- function(dt) {
 
 #data cleaning
 cleaned_contract_note_contents <- function(php_text) {
+	#This code is poentially dangerous because it removes lines containing certain strings
+	#The problem is that if an underlying happens to contain the target phrases used herein 
+	#It would remove the lines that contain transaction information and cause all kinds of other problems
 	
+	#remove lines (strings) containing: 
+	# STATEMENT (beginning of CN), Important Notes (footnote at each page), Page(top of each page)
 	title_start<-which(str_detect(php_text,'STATEMENT'))
 	title_end<-which(str_detect(php_text,'STATEMENT'))+5
 	title_list<-NULL
@@ -61,26 +66,34 @@ cleaned_contract_note_contents <- function(php_text) {
 		page_list<-c(page_list,title)	
 	}
 	page_list
-
 	php_text<-php_text[-c(title_list,note_list,page_list)]
 
-#remove contracts; trans;cd;date etc
-php_text<-php_text[-c(which(str_detect(php_text,'CONTRACT|TRANS|CD|DATE|Comm|TOTAL|SETTLEMENT')))]
+	
 
-#remove corp action
-corp_act<-php_text[c(which(str_detect(php_text,'CORPORATE ACTION')):length(php_text))]
-corp_act<-corp_act[-c(1)]
+	#remove contracts; trans;cd;date etc
+	php_text<-php_text[-c(which(str_detect(php_text,'CONTRACT|TRANS|CD|DATE|Comm|TOTAL|SETTLEMENT')))]
 
-corp_act_a<-corp_act[seq(2,length(corp_act),2)]%>%str_squish()
-corp_dt<-corp_act_a[seq(1,length(corp_act_a),2)]%>%str_sub(1,8)%>%as.Date('%d/%m/%y')
+	#remove corp action
+	corp_act<-php_text[c(which(str_detect(php_text,'CORPORATE ACTION')):length(php_text))]
+	corp_act<-corp_act[-c(1)]
 
-corp_act_b<-corp_act_a[seq(1,length(corp_act_a),2)]
-corp_act_b%>%str_sub(9)%>%str_squish()%>%
-%>%str_detect('[A-Za-z]')
+	corp_act_a<-corp_act[seq(2,length(corp_act),2)]%>%str_squish()
+	corp_dt<-corp_act_a[seq(1,length(corp_act_a),2)]%>%str_sub(1,8)%>%as.Date('%d/%m/%y')
 
-php_text<-php_text[-c(which(str_detect(php_text,'CORPORATE ACTION')):length(php_text))]
+	corp_act_b<-corp_act_a[seq(1,length(corp_act_a),2)]
+	corp_act_b%>%str_sub(9)%>%str_squish()%>%
+		%>%str_detect('[A-Za-z]')
 
-#remove security movements
-corp_act2<-php_text[c(which(str_detect(php_text,'SECURITY MOVEMENT')):length(php_text))]
+	php_text<-php_text[-c(which(str_detect(php_text,'CORPORATE ACTION')):length(php_text))]
 
-php_text<-php_text[-c(which(str_detect(php_text,'SECURITY MOVEMENT')):length(php_text))]
+	#remove security movements
+	corp_act2<-php_text[c(which(str_detect(php_text,'SECURITY MOVEMENT')):length(php_text))]
+	php_text<-php_text[-c(which(str_detect(php_text,'SECURITY MOVEMENT')):length(php_text))]
+}
+
+
+
+
+
+
+	

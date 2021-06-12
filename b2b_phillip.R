@@ -2,35 +2,25 @@
 
 #daily setting
 #today; yesterday; day before yesterday; day after tommorrow
-library("stringr")
-library("readr")
-library("pdftools")
-library('bizdays')
-
 today<-Sys.Date();today
 fnm_t<-format(today,format="%Y%m%d");fnm_t
 fnm5<-paste(str_sub(fnm_t,7,8),str_sub(fnm_t,5,6),str_sub(fnm_t,1,4),sep="");fnm5
 
-#change today-2 back to today-1 after done debugging -- MT 2021.06.12 
-#this is because i am debugging on a saturday 
-#but ideally either use business days or scan new and un-processed contract notes file
 #last trading day
 if(weekdays(today)=="Monday"){
 	fnm_y<-format(today-3,format="%Y%m%d");fnm_y
 	} else {
-		fnm_y<-format(today-2,format="%Y%m%d");fnm_y
+		fnm_y<-format(today-1,format="%Y%m%d");fnm_y
 		}
 last_t<-paste(str_sub(fnm_y,1,4),str_sub(fnm_y,5,6),str_sub(fnm_y,7,8),sep="_");last_t
 
 
 #reading data from pdf
-#path<-paste('Z:/DayEnd Report/Phillip Daily Report/Contract note for Margin Account - 2065959',sep="")
-path<-paste('Z:/',sep="")
+path<-paste('Z:/DayEnd Report/Phillip Daily Report/Contract note for Margin Account - 2065959',sep="")
 file<-paste('Contract note for Margin Account - 2065959-',last_t,'.pdf',sep='')
 php_text<-pdf_text(pdf=paste(path,'/',file,sep=''))%>%
 	readr::read_lines()
 
-print(php_text)
 #data cleaning
 title_start<-which(str_detect(php_text,'STATEMENT'))
 title_end<-which(str_detect(php_text,'STATEMENT'))+5
