@@ -12,6 +12,7 @@ from operator import itemgetter
 import locale
 import shutil
 from glob import glob
+import numpy as np
 
 import sys
 #sys.path.append("c:\\users\\mtang\\Documents\\Research\\HKExFilingScrape\\")
@@ -27,6 +28,7 @@ BackupDir =  HKFilingsDir + "Backup\\"
 DailyFilingsDir = HKFilingsDir + "DailyFilings\\"
 
 FundsList = HKFilingsDir + "Funds.csv"
+CompleteFundsList = HKFilingsDir + "AllFunds.csv"
 ScrapedFormsList = HKFilingsDir + "FullScrapingList.csv"
 HistoricalForms2ScrapeList = HKFilingsDir + "HistoricalList2Scrape.csv"
 ErrorLog = HKFilingsDir + "Log.csv"
@@ -36,9 +38,6 @@ ErrorLog = HKFilingsDir + "Log.csv"
 ##After 2017.07.02: http://sdinotice.hkex.com.hk/di/NSAllFormDateList.aspx?sa1=da&scsd=26/03/2018&sced=27/03/2018&src=MAIN&lang=EN
 
 HKFunds = ["Fuhui Capital Investment Limited",
-           "香港大生投資控股有限公司",
-           "大生控股有限公司",
-           "深圳前海大生股權投資基金有限公司",
            "Argyle Street Management Holdings Limited",
            "PX Capital Management Ltd",
            "PX Capital Partners",
@@ -59,13 +58,25 @@ HKFunds = ["Fuhui Capital Investment Limited",
            "China Minsheng Investment Group Corp",
            "Head and Shoulders Direct Investment Limited",
            "Central China International Investment Company Limited",
-           "DA Equity Partners Limited",
            "Chen Ningdi",
-           "Edgbaston Investment Partners LLP"
-           ]
+           "Edgbaston Investment Partners LLP",
+           "matthews international capital management llc",
+           "da equity partners ltd"
 
+           ]
+def CleanFundNameStr (text_str):
+    #if np.nan(text_str):
+    #    return('')
+    text_str = FTM.CleanString(text_str)
+    text_str = text_str.replace(".", "")
+    text_str = re.sub('\s+', ' ', text_str)
+    text_str = text_str.lower()
+    text_str = re.sub('limited', 'ltd', text_str)
+    
+    return(text_str)
+ 
 def SaveFundsFile():
-    CleanedFundNames = [(FTM.CleanString(line),) for line in HKFunds]
+    CleanedFundNames = [(CleanFundNameStr(FTM.CleanString(line)),) for line in HKFunds]
     FTM.SafeAddData(FundsList, CleanedFundNames)
     return
 SaveFundsFile()
@@ -87,16 +98,38 @@ def Fundname2FundFileName(fund):
     fundnameStr = p.sub('', fundnameStr)
     return(fundnameStr)
 
-def CleanFundNameStr (text_str):
-    text_str = text_str.replace(".", "")
-    text_str = re.sub('\s+', ' ', text_str)
-    text_str = text_str.lower()
-    text_str = re.sub('limited', 'ltd', text_str)
+   
+
+def CleanFundNameOneFile(filename):
+    x = pd.read_csv(filename, header=None)
+    x.replace(np.nan, '',regex=True,inplace=True)
+    x.iloc[:,2] = [CleanFundNameStr(s) for s in x.loc[:,2]]
+    x.to_csv(filename, header=None, columns=None, index=False)
+    return(x)
+
+def CleanFundNameAllFiles():
+    tickerfiles = glob(FilingsByTickerDir+ "*.csv")
+    for tickerfile in tickerfiles: 
+        print(tickerfile)
+        CleanFundNameOneFile(tickerfile)
+    return
     
-    return(text_str)
     
-    
-    
+def CollectAllFundNames():
+    tickerfiles = glob(FilingsByTickerDir+ "*.csv")
+    fundnames = []
+    for tickerfile in tickerfiles: 
+        print(tickerfile)
+        x = pd.read_csv(tickerfile, header=None)
+        x.replace(np.nan, '',regex=True,inplace=True)
+        fundnames += list(x.loc[:,2])
+    fundnames = sorted(list(set(fundnames)))
+    fundnames = [CleanFundNameStr(FTM.CleanString(x)) for x in fundnames ]
+    fundnames = sorted(fundnames)
+    CleanedFundNames = [(CleanFundNameStr(FTM.CleanString(line)),) for line in fundnames]
+    FTM.SafeAddData(CompleteFundsList, CleanedFundNames)
+    return
+
 
 def UpdateFundsfromTickerFile(funds, ticker, lazyUpdate=True):
     tickerfile = FilingsByTickerDir+ticker+".csv"
@@ -557,8 +590,8 @@ def ScrapeOneHKExFiling(formID, filingurl, filingDtIn, filingCode, longshortCode
     #print(postEventSummary)
     aevtSummary = ScrapePositionSummary(postEventSummary)
 
-    SaveFilingData (stockCode, eventDt, filingCode, CleanFundNameStr(investorName), eventInfo, aevtSummary,  bevtSummary, filingurl.strip(), filingDt)
-    return ([(stockCode, eventDt, filingCode, CleanFundNameStr(investorName), eventInfo, aevtSummary,  bevtSummary, filingurl.strip(), filingDt)])
+    SaveFilingData (stockCode, eventDt, filingCode, CleanFundNameStr(FTM.CleanString(investorName)), eventInfo, aevtSummary,  bevtSummary, filingurl.strip(), filingDt)
+    return ([(stockCode, eventDt, filingCode, CleanFundNameStr(FTM.CleanString(investorName)), eventInfo, aevtSummary,  bevtSummary, filingurl.strip(), filingDt)])
 
 def ScrapeHKExFilingsfromList(targetList):
     scrapeResults = []
@@ -723,8 +756,8 @@ def HKExFilingDailyBatch():
 
 
 
-#HKExFilingDailyBatch()
-#InitializeFundFilings()
+HKExFilingDailyBatch()
+InitializeFundFilings()
 # =============================================================================
 # for i in range(5):
 #     j = 10000

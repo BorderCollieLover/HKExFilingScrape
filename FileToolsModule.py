@@ -52,6 +52,8 @@ def CleanString(inputStr):
     if not inputStr:
         return ('')
     else:
+        #if (inputStr ==''):
+        #    return(inputStr)
         p = re.compile(',')
         inputStr = p.sub(' ', inputStr)
         p = re.compile('_')
