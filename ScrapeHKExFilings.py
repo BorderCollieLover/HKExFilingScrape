@@ -43,6 +43,7 @@ HKFunds = ["Fuhui Capital Investment Limited",
            "PX Capital Partners",
            "PX Global Advisors LLC",
            "Mawer Investment Management Ltd",
+           "朱雀基金管理有限公司",
            "Keytone Capital Partners",
            "Keytone Investment Group Ltd",
            "Beijing Jiankun Investment Group Co",
@@ -141,7 +142,7 @@ def UpdateFundsfromTickerFile(funds, ticker, lazyUpdate=True):
         return
 
     for fund in funds:
-        #print(fund)
+        print(fund)
         fundnameStr = Fundname2FundFileName(fund)
         fundfile = FilingsByFundDir+fundnameStr+".csv"
         if os.path.isfile(fundfile):
@@ -179,6 +180,7 @@ def InitializeFundFilings():
     funds = [line[0] for line in funds]
     newfunds = []
     for fund in funds:
+        #print(fund)
         if not os.path.isfile(FilingsByFundDir+ Fundname2FundFileName(fund) + ".csv"):
             newfunds += [fund]
 
@@ -756,8 +758,8 @@ def HKExFilingDailyBatch():
 
 
 
-HKExFilingDailyBatch()
-InitializeFundFilings()
+#HKExFilingDailyBatch()
+#InitializeFundFilings()
 # =============================================================================
 # for i in range(5):
 #     j = 10000
