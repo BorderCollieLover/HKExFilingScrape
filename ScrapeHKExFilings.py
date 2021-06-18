@@ -62,8 +62,11 @@ HKFunds = ["Fuhui Capital Investment Limited",
            "Chen Ningdi",
            "Edgbaston Investment Partners LLP",
            "matthews international capital management llc",
-           "da equity partners ltd"
-
+           "da equity partners ltd",
+           "schroders plc",
+           "brandes investment partners lp",
+           "hillhouse capital management ltd",
+           "上海宁泉资产管理有限公司"
            ]
 def CleanFundNameStr (text_str):
     #if np.nan(text_str):
@@ -142,7 +145,7 @@ def UpdateFundsfromTickerFile(funds, ticker, lazyUpdate=True):
         return
 
     for fund in funds:
-        print(fund)
+        #print(fund)
         fundnameStr = Fundname2FundFileName(fund)
         fundfile = FilingsByFundDir+fundnameStr+".csv"
         if os.path.isfile(fundfile):
@@ -758,8 +761,8 @@ def HKExFilingDailyBatch():
 
 
 
-#HKExFilingDailyBatch()
-#InitializeFundFilings()
+HKExFilingDailyBatch()
+InitializeFundFilings()
 # =============================================================================
 # for i in range(5):
 #     j = 10000
