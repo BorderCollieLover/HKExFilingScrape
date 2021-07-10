@@ -66,7 +66,12 @@ HKFunds = ["Fuhui Capital Investment Limited",
            "schroders plc",
            "brandes investment partners lp",
            "hillhouse capital management ltd",
-           "上海宁泉资产管理有限公司"
+           "上海宁泉资产管理有限公司",
+           "pinpoint capital management group",
+           "keywise capital management (hk) ltd",
+           "prime capital management company ltd",
+           "greenwoods asset management ltd",
+           "snow lake capital (hk) ltd"
            ]
 def CleanFundNameStr (text_str):
     #if np.nan(text_str):
