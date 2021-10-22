@@ -74,6 +74,7 @@ def CompareData2CSV(data, csvfile):
             else:
                 return False
         except Exception as e:
+            print(e)
             return False
     else:
         return False
@@ -290,7 +291,43 @@ def BuybackSummaryfromFile(filename=BuyBackSummaryFile):
                 output_data = data
             else:
                 output_data = output_data.append(data, ignore_index=True)
+        
+        print(ticker)
+        print(data)
+        share_types = np.unique(data['Stock Type'])
+        if len(share_types)==1:
+            output_data = output_data.append(data[-1:], ignore_index=True)
+        else: 
+            for share_type in share_types: 
+                tmp_data = data[data['Stock Type']==share_type]
+                output_data = output_data.append(tmp_data[-1:], ignore_index=True)
                 
+    output_data.sort_values(by=['Trade Date', 'YTD %'], inplace=True )
+    output_data.drop_duplicates(inplace=True)
+    output_data.to_csv(BuyBackSnapshotFile , index=False)
+    return (output_data)
+
+
+def BuybackAggregatefromFile(filename=BuyBackSummaryFile):
+    BuybackHeader = ['Company', 'Ticker', 'Stock Type', 'Trade Date', 'Number of Shares', 'Last Buyback High Price', 'Last Buyback Low Price', 'Last Buyback Total',
+                  'Method of Purchase', 'YTD Shares', 'YTD %']
+    
+    BuybackData = pd.read_csv(filename, header=None, names=BuybackHeader)
+    BuybackData.sort_values(by='Trade Date', inplace=True)
+    tickers = np.unique(BuybackData['Ticker'])
+    output_data = pd.DataFrame()
+    
+    
+    for ticker in tickers: 
+        data = BuybackData[BuybackData['Ticker']==ticker]
+        if (len(data) ==1):
+            if output_data.empty: 
+                output_data = data
+            else:
+                output_data = output_data.append(data, ignore_index=True)
+        
+        print(ticker)
+        print(data)
         share_types = np.unique(data['Stock Type'])
         if len(share_types)==1:
             output_data = output_data.append(data[-1:], ignore_index=True)
