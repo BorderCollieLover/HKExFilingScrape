@@ -11,6 +11,7 @@ import datetime
 import numpy as np
 import requests
 from pandas.tseries.offsets import BDay
+import yfinance as yf
 
 
 #Notes on the data:
@@ -33,6 +34,7 @@ BuyBackSummaryFile = HKFilingsDir + "BuybackSummary.csv"
 AllBuyBackSummaryFile = HKFilingsDir + "AllBuybackSummary.csv"
 BuyBackSnapshotFile = HKFilingsDir + "BuybackSnapshot.csv"
 BuybackTickerFile = HKFilingsDir + "Snapshots\\tickers.csv"
+AggregatedBuybackDataFile =  HKFilingsDir +"AggregatedBuybackStats.csv"
 
 
 
@@ -248,7 +250,7 @@ def ReadOneReport(filename):
 
 
 def UpdateAnnualBuyBackData():
-    scrapingdts = pd.bdate_range(start=datetime.datetime(2021,1,1), end=datetime.datetime.now()).tolist()
+    scrapingdts = pd.bdate_range(start=datetime.datetime.today()- datetime.timedelta(days=365), end=datetime.datetime.now()).tolist()
     x = []    
     for scrapingdt in scrapingdts:
         tmp = ReadOneReport(HKFilingsDir + "Repurchase\\"+scrapingdt.strftime('%Y%m%d')+'.xls')
@@ -262,7 +264,7 @@ def UpdateAnnualBuyBackData():
 
 
 def UpdateAllBuyBackData():
-    scrapingdts = pd.bdate_range(start=datetime.datetime(2003,1,1), end=datetime.datetime.now()).tolist()
+    scrapingdts = pd.bdate_range(start= datetime.today() - datetime.timedelta(days=365), end=datetime.datetime.now()).tolist()
     x = []    
     for scrapingdt in scrapingdts:
         tmp = ReadOneReport(HKFilingsDir + "Repurchase\\"+scrapingdt.strftime('%Y%m%d')+'.xls')
@@ -292,8 +294,8 @@ def BuybackSummaryfromFile(filename=BuyBackSummaryFile):
             else:
                 output_data = output_data.append(data, ignore_index=True)
         
-        print(ticker)
-        print(data)
+        #print(ticker)
+        #print(data)
         share_types = np.unique(data['Stock Type'])
         if len(share_types)==1:
             output_data = output_data.append(data[-1:], ignore_index=True)
@@ -326,8 +328,8 @@ def BuybackAggregatefromFile(filename=BuyBackSummaryFile):
             else:
                 output_data = output_data.append(data, ignore_index=True)
         
-        print(ticker)
-        print(data)
+        #print(ticker)
+        #print(data)
         share_types = np.unique(data['Stock Type'])
         if len(share_types)==1:
             output_data = output_data.append(data[-1:], ignore_index=True)
@@ -341,8 +343,102 @@ def BuybackAggregatefromFile(filename=BuyBackSummaryFile):
     output_data.to_csv(BuyBackSnapshotFile , index=False)
     return (output_data)
 
+def aggregate_buyback(tmp_data):
+    company = tmp_data.iloc[0]['Company']
+    ticker = tmp_data.iloc[0]['Ticker']
+    stock_type = tmp_data.iloc[0]['Stock Type']
+    last_rptd_trade_dt = sorted(tmp_data['Trade Date'])[len(tmp_data['Trade Date'])-1]
+    total_shares = sum(tmp_data['Number of Shares'])
+    buyback_amts = tmp_data['Last Buyback Total']
+    currency='HKD'
+    amt = 0
+    for one_amt in list(buyback_amts): 
+        tmp = one_amt.split()
+        currency = tmp[0]
+        amt = amt + float(tmp[1])
+        
+    total_amt = amt
+    average_pr = total_amt / total_shares
+    #print(ticker, stock_type, last_rptd_trade_dt, total_shares, total_amt, average_pr)
+    return([company, ticker, stock_type, currency, last_rptd_trade_dt, total_shares, total_amt, average_pr])
     
+    
+def AggregatedBuybackStatistics(filename=BuyBackSummaryFile):
+    #1. Get all data for the given period from the summary file
+    #2. aggregate by ticker and share type
+    #3. For reach ticker/share type, aggregate the shares and the costs 
+    #4. create an array that contains: a) ticker; b) share type; c) last reported date, d) currency ; e) aggregated shares, f) aggregated costs; g) average price; 
+    BuybackHeader = ['Company', 'Ticker', 'Stock Type', 'Trade Date', 'Number of Shares', 'Last Buyback High Price', 'Last Buyback Low Price', 'Last Buyback Total',
+                  'Method of Purchase', 'YTD Shares', 'YTD %']
+    
+    BuybackData = pd.read_csv(filename, header=None, names=BuybackHeader)
+    BuybackData.sort_values(by='Trade Date', inplace=True)
+    tickers = np.unique(BuybackData['Ticker'])
+    output_data = pd.DataFrame(columns=['Company', 'Ticker', 'Stock Type', 'Currency', 'Last Trade Date', 'Number of Shares','Buyback Total', 'Average Price',"Current Price","Current Price Premium"])
+    
+    for ticker in tickers: 
+        data = BuybackData[BuybackData['Ticker']==ticker]
+        
+       #print(ticker)
+       #print(data)
+        share_types = np.unique(data['Stock Type'])
+        if len(share_types)==1:
+            share_type = share_types[0]
+            tmp_data = data[data['Stock Type']==share_type]
+            try:
+                aggregated_buyback = aggregate_buyback(tmp_data)
+                #print(aggregated_buyback)
+                output_data = output_data.append({'Company': aggregated_buyback[0], 'Ticker':aggregated_buyback[1], 'Stock Type':aggregated_buyback[2], 'Currency':aggregated_buyback[3], 
+                                    'Last Trade Date': aggregated_buyback[4], 'Number of Shares':aggregated_buyback[5], 'Buyback Total':aggregated_buyback[6], 'Average Price':aggregated_buyback[7]}, ignore_index=True)
+                
+                    
+                #print(output_data)
+            except Exception as e:
+                print (e)
+                #aggregated_buyback = ['', ticker, share_type, '', '', '', '', '']
+                output_data = output_data.append({'Ticker': ticker, 'Stock Type':share_type}, ignore_index=True)
+            #output_data = output_data.append(aggregated_buyback, ignore_index=True)
+            
+            
+        else: 
+            for share_type in share_types: 
+                tmp_data = data[data['Stock Type']==share_type]
+                try:
+                    aggregated_buyback = aggregate_buyback(tmp_data)
+                    #print(aggregated_buyback)
+                    output_data = output_data.append({'Company': aggregated_buyback[0], 'Ticker':aggregated_buyback[1], 'Stock Type':aggregated_buyback[2], 'Currency':aggregated_buyback[3], 
+                                        'Last Trade Date': aggregated_buyback[4], 'Number of Shares':aggregated_buyback[5], 'Buyback Total':aggregated_buyback[6], 'Average Price':aggregated_buyback[7]}, ignore_index=True)
+                except Exception as e:
+                    print (e)
+                    #aggregated_buyback = ['', ticker, share_type, '', '', '', '', '']
+                    output_data = output_data.append({'Ticker': ticker, 'Stock Type':share_type}, ignore_index=True)
+                    
+                #output_data = output_data.append(aggregated_buyback, ignore_index=True)
+                
+        
+    #print(output_data)
+    output_data = output_data.sort_values(by=['Buyback Total'], ascending=False)
+    
+    #Add current price and calculate premium/discount to average buyback price
+    #output_data["Current Price"]=""
+    #output_data["Current Price Premium"]=""
+    for i in range(len(output_data.index)):
+        if (output_data.iloc[i]['Currency'] == 'HKD'):
+            try:
+                stock = yf.Ticker(output_data.iloc[i]['Ticker'])
+                output_data.iloc[i]['Current Price'] = stock.info['regularMarketPrice']
+                output_data.iloc[i]['Current Price Premium'] = np.log(output_data.iloc[i]['Current Price']/output_data.iloc[i]['Average Price'])
+                #print(stock)
+            except Exception as e:
+                print(e)
+            
+    output_data.to_csv(AggregatedBuybackDataFile,index=False)
+    return(output_data)
+    
+
 DownloadBuyBackReports()
 UpdateAnnualBuyBackData()
 BuybackSummaryfromFile()
+AggregatedBuybackStatistics()
+
 #UpdateAllBuyBackData()

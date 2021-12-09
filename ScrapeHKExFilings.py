@@ -92,7 +92,9 @@ HKFunds = ["Fuhui Capital Investment Limited",
            "gic private ltd",
            "lake bleu prime healthcare master fund ltd",
            "hudson bay master fund ltd",
-           "mondrian investment partners ltd"
+           "mondrian investment partners ltd",
+           "hermes investment management ltd",
+           "pine general partners ltd"
            ]
 def CleanFundNameStr (text_str):
     #if np.nan(text_str):
@@ -816,7 +818,7 @@ InitializeFundFilings()
 #UpdateFundsfromTickerFile(HKFunds, "00000")
 #DailyScrapeHKExFilings()
 #UpdateFilingList2Scrape()
-#ScrapeOneHKExFiling("00000", "http://sdinotice.hkex.com.hk/filing/di/NSForm2.aspx?fn=321838", "000000", "000000", "000000")
+#result = ScrapeOneHKExFiling("00000", "http://sdinotice.hkex.com.hk/filing/di/NSForm2.aspx?fn=321838", "000000", "000000", "000000")
 #ScrapeOneHKExFiling("00000", "http://sdinotice.hkex.com.hk/di/NSForm2.aspx?fn=CS20180328E00109", "000000", "000000", "000000")
 # This really should be run just once to create the FullScrapingList when first started collecting data.
 # The FullScrapingList is subsequently updated in daily runs
