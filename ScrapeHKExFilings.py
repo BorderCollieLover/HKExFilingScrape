@@ -21,7 +21,8 @@ import FileToolsModule as FTM
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 #HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
-HKFilingsDir = "X:\\HKExFilings\\"
+#HKFilingsDir = "X:\\HKExFilings\\"
+HKFilingsDir = "D:\\HKEx\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 FilingsByFundDir = HKFilingsDir + "FilingsByFund\\"
 BackupDir =  HKFilingsDir + "Backup\\"

@@ -28,7 +28,8 @@ rptName = '/Users/shared/HKEx/Repurchase/20111216.xls'
 rptName = '/Users/shared/HKEx/Repurchase/20120102.xls'
 rptName = '/Users/shared/HKEx/Repurchase/20080822.xls'
 rptName = 'c:\\users\\mtang\\HKEx\\Repurchase\\20210603.xls'
-HKFilingsDir = "X:\\HKExFilings\\"
+#HKFilingsDir = "X:\\HKExFilings\\"
+HKFilingsDir = "D:\\HKEx\\"
 
 BuyBackSummaryFile = HKFilingsDir + "BuybackSummary.csv"
 AllBuyBackSummaryFile = HKFilingsDir + "AllBuybackSummary.csv"
@@ -417,21 +418,24 @@ def AggregatedBuybackStatistics(filename=BuyBackSummaryFile):
                 
         
     #print(output_data)
-    output_data = output_data.sort_values(by=['Buyback Total'], ascending=False)
+    
     
     #Add current price and calculate premium/discount to average buyback price
     #output_data["Current Price"]=""
     #output_data["Current Price Premium"]=""
     for i in range(len(output_data.index)):
-        if (output_data.iloc[i]['Currency'] == 'HKD'):
+    #for i in range(10):
+        if (output_data.loc[i]['Currency'] == 'HKD'):
             try:
-                stock = yf.Ticker(output_data.iloc[i]['Ticker'])
-                output_data.iloc[i]['Current Price'] = stock.info['regularMarketPrice']
-                output_data.iloc[i]['Current Price Premium'] = np.log(output_data.iloc[i]['Current Price']/output_data.iloc[i]['Average Price'])
+                stock = yf.Ticker(output_data.loc[i]['Ticker'])
+                #print(stock)
+                output_data.at[i,'Current Price'] = stock.info['regularMarketPrice']
+                output_data.at[i,'Current Price Premium'] = np.log(output_data.loc[i]['Current Price']/output_data.loc[i]['Average Price'])
                 #print(stock)
             except Exception as e:
                 print(e)
             
+    output_data = output_data.sort_values(by=['Buyback Total'], ascending=False)
     output_data.to_csv(AggregatedBuybackDataFile,index=False)
     return(output_data)
     
