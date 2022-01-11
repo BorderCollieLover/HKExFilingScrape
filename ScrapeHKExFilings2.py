@@ -14,6 +14,8 @@ import shutil
 from glob import glob
 import numpy as np
 
+
+
 import sys
 #sys.path.append("c:\\users\\mtang\\Documents\\Research\\HKExFilingScrape\\")
 import FileToolsModule as FTM
@@ -27,6 +29,7 @@ FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 FilingsByFundDir = HKFilingsDir + "FilingsByFund\\"
 BackupDir =  HKFilingsDir + "Backup\\"
 DailyFilingsDir = HKFilingsDir + "DailyFilings\\"
+DIDir = HKFilingsDir + "DI\\"
 
 FundsList = HKFilingsDir + "Funds.csv"
 CompleteFundsList = HKFilingsDir + "AllFunds.csv"
@@ -539,6 +542,24 @@ def ScrapeInvestorInfo(formUrl):
                 upCtr +=1
                 if upCtr >3:
                     break
+                
+        directorName = FTM.CleanString(directorName)
+        if (len(directorName)==0):
+            directorID = formUrl.find('span', attrs={'id': "lblChiName"})
+            #print('here')
+            #print(directorID)
+            upCtr = 0
+            if directorID:
+                while (directorName==''):
+                    chinameID = directorID.find('span', attrs={'id': "lblDChiName"})
+                    if chinameID:
+                        directorName = chinameID.text
+                        print(directorName)
+                        directorName = FTM.CleanString(directorName)
+                    directorID = directorID.parent
+                    upCtr += 1
+                    if upCtr > 3: 
+                        break;
     else:
         directorName = GetEventStr(investorID)
     return(directorName)
@@ -562,6 +583,7 @@ def ScrapeOneHKExFiling(formID, filingurl, filingDtIn, filingCode, longshortCode
         return None
 
     soup = BeautifulSoup(filingpage)
+    print(soup)
     #1. Look for stock code:
     lines = soup.findAll('span', attrs={'id': "lblDStockCode"})
     if lines:
@@ -790,8 +812,8 @@ def HKExFilingDailyBatch():
 
 
 
-HKExFilingDailyBatch()
-InitializeFundFilings()
+#HKExFilingDailyBatch()
+#InitializeFundFilings()
 # =============================================================================
 # for i in range(5):
 #     j = 10000
@@ -819,7 +841,7 @@ InitializeFundFilings()
 #UpdateFundsfromTickerFile(HKFunds, "00000")
 #DailyScrapeHKExFilings()
 #UpdateFilingList2Scrape()
-#result = ScrapeOneHKExFiling("00000", "http://sdinotice.hkex.com.hk/filing/di/NSForm2.aspx?fn=321838", "000000", "000000", "000000")
+result = ScrapeOneHKExFiling("00000", "https://di.hkex.com.hk/di/NSForm1.aspx?fn=IS20170830E00004", "000000", "000000", "000000")
 #ScrapeOneHKExFiling("00000", "http://sdinotice.hkex.com.hk/di/NSForm2.aspx?fn=CS20180328E00109", "000000", "000000", "000000")
 # This really should be run just once to create the FullScrapingList when first started collecting data.
 # The FullScrapingList is subsequently updated in daily runs
@@ -841,8 +863,59 @@ def ScrapeHistoricalFilingList():
 
 
 
+#Fix old scraping data where the chinese name of directors are missing
+def FixDname(ticker):
+    ticker_filing_file = FilingsByTickerDir + ticker + ".csv"
+    ticker_filing_header = ['Date', 'Code', 'Investor', 'Shares', 'Currency', 'HighPrice', 'AvgPrice', 'OffExHighPrice', 'OffExAvgPrice', 'LongPos', 
+                            'LongPct', 'ShortPos', 'ShortPct', 'LongPosPre', 'LongPctPre', 'ShortPosPre', 'ShortPctPre', 'FilingURL', 'FileDate' ]
+    
+    data = pd.read_csv(ticker_filing_file, header=None, names =ticker_filing_header)
+    data.replace(np.nan, '',regex=True,inplace=True)
+    data_changed = False
+    for i in range(len(data.index)):
+        #print(i)
+        if (FTM.CleanString(data.iloc[i]['Investor']) == ""):
+            #print(i, 'here')
+            filingurl = data.iloc[i]['FilingURL']
+            try:
+                filingpage = urlopen(filingurl)
+            except HTTPError as e:
+                print('The server couldn\'t fulfill the request.')
+                print('Error code: ', e.code)
+                return None
+            except URLError as e:
+                print('We failed to reach a server.')
+                print('Reason: ', e.reason)
+                return None
+            except Exception as e:
+                print('Unknown exception raised.')
+                print(e)
+                return None
 
+            soup = BeautifulSoup(filingpage)
+            investorName = ScrapeInvestorInfo(soup)
+            
+            #print(investorName)
+            if not (investorName ==""):
+                data.at[i,'Investor'] = investorName
+                data_changed=True
+    
+    if data_changed:
+        data.to_csv(ticker_filing_file, header=False, index=False)
+            
+            
+    
+def FixAllDname():
+    tickerfiles = glob(FilingsByTickerDir+ "*.csv")
+    tickers = [os.path.splitext(os.path.basename(tickerfile))[0] for tickerfile in tickerfiles]
+    
+    for ticker in tickers:
+        print(ticker)
+        FixDname(ticker)
 
+    
+
+    
 
 
 

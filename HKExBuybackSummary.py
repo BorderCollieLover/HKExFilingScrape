@@ -28,8 +28,8 @@ rptName = '/Users/shared/HKEx/Repurchase/20111216.xls'
 rptName = '/Users/shared/HKEx/Repurchase/20120102.xls'
 rptName = '/Users/shared/HKEx/Repurchase/20080822.xls'
 rptName = 'c:\\users\\mtang\\HKEx\\Repurchase\\20210603.xls'
-#HKFilingsDir = "X:\\HKExFilings\\"
-HKFilingsDir = "D:\\HKEx\\"
+HKFilingsDir = "X:\\HKExFilings\\"
+#HKFilingsDir = "D:\\HKEx\\"
 
 BuyBackSummaryFile = HKFilingsDir + "BuybackSummary.csv"
 AllBuyBackSummaryFile = HKFilingsDir + "AllBuybackSummary.csv"
@@ -372,8 +372,17 @@ def AggregatedBuybackStatistics(filename=BuyBackSummaryFile):
     BuybackHeader = ['Company', 'Ticker', 'Stock Type', 'Trade Date', 'Number of Shares', 'Last Buyback High Price', 'Last Buyback Low Price', 'Last Buyback Total',
                   'Method of Purchase', 'YTD Shares', 'YTD %']
     
-    BuybackData = pd.read_csv(filename, header=None, names=BuybackHeader)
+    BuybackData = pd.read_csv(filename, header=None, names=BuybackHeader, parse_dates=['Trade Date'])
     BuybackData.sort_values(by='Trade Date', inplace=True)
+    
+    #today's date and use only buyback data from within the last 12 months 
+    today_dt = datetime.datetime.today()
+    cutoff_test = [(today_dt - dt ).days < 365 for dt in BuybackData['Trade Date']]
+    BuybackData['DaystoToday']= cutoff_test
+    #BuybackData.DaystoToday = [(today_dt - dt ).days < 365 for dt in BuybackData['Trade Date']]
+    
+    #print(BuybackData.DaystoToday)
+    BuybackData = BuybackData[BuybackData['DaystoToday'] == True]
     tickers = np.unique(BuybackData['Ticker'])
     output_data = pd.DataFrame(columns=['Company', 'Ticker', 'Stock Type', 'Currency', 'Last Trade Date', 'Number of Shares','Buyback Total', 'Average Price',"Current Price","Current Price Premium"])
     
