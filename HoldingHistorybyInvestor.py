@@ -24,7 +24,7 @@ DIDir = HKFilingsDir + "DI\\"
 #investor = 'lee sing din'
 
 
-
+holdingoutput_columns = ['Ticker', 'Investor', 'Long Delta', 'Rpt Purchase Shrs', 'Rpt Purchase Amt', 'Avg. Purchase Px', 'Last Rpt Purchase Dt', 'Rpt Sale Shrs', 'Rpt Sale Amt', 'Avg. Sale Px', 'Last Rpt Sale Dt', 'Form Code', 'End Long Shrs', 'Init Long Shrs', 'End Long Pct', 'Init Long Pct']
 
 def holding_history_by_investor (ticker, investor):
     #from the filing by ticker file, extract the holding history of a particular investor
@@ -50,15 +50,32 @@ def analyze_one_investor_history(investor_data):
     #LONG: 1001, 1101, 1110, 1113
     #SHORT: 1201, 1209, 1211, 1213
     init_long_shrs = investor_data.iloc[0]['LongPosPre']
+    #print(init_long_shrs)
+    if np.isnan(init_long_shrs):
+        init_long_shrs = 0 
     init_long_pct = investor_data.iloc[0]['LongPctPre']
+    if np.isnan(init_long_pct):
+        init_long_pct = 0
     init_short_shrs = investor_data.iloc[0]['ShortPosPre']
+    if np.isnan(init_short_shrs):
+        init_short_shrs = 0 
     init_short_pct = investor_data.iloc[0]['ShortPctPre']
+    if np.isnan(init_short_pct):
+        init_short_pct = 0 
     
     end_idx = len(investor_data.index)-1
     end_long_shrs = investor_data.iloc[end_idx]['LongPos']
+    if np.isnan(end_long_shrs):
+        end_long_shrs = 0 
     end_long_pct = investor_data.iloc[end_idx]['LongPct']
+    if np.isnan(end_long_pct):
+        end_long_pct = 0 
     end_short_shrs = investor_data.iloc[end_idx]['ShortPos']
+    if np.isnan(end_short_shrs):
+        end_short_shrs  = 0 
     end_short_pct = investor_data.iloc[end_idx]['ShortPct']
+    if np.isnan(end_short_pct):
+        end_short_pct = 0
     
     long_changes = end_long_shrs - init_long_shrs
     short_changes = end_long_shrs - init_long_shrs
@@ -118,8 +135,16 @@ def analyze_one_investor_history(investor_data):
                 if ('Form3A' in form_url):
                     form_code = 'Form3A'
                     
+    avg_purchase_px = 0
+    avg_sale_px = 0 
+    if (long_rpt_shrs > 0 ):
+        avg_purchase_px = long_rpt_amt / long_rpt_shrs
+    if (short_rpt_shrs > 0 ):
+        avg_sale_px = short_rpt_amt / short_rpt_shrs
+    
+                    
     #print([long_changes, long_rpt_shrs, long_rpt_amt,  last_long_dt, short_rpt_shrs, short_rpt_amt, last_short_dt, form_code,  end_long_shrs, init_long_shrs, end_long_pct, init_long_pct])
-    return([long_changes, long_rpt_shrs, long_rpt_amt,  last_long_dt, short_rpt_shrs, short_rpt_amt, last_short_dt, form_code,  end_long_shrs, init_long_shrs, end_long_pct, init_long_pct])
+    return([long_changes, long_rpt_shrs, long_rpt_amt,  last_long_dt, short_rpt_shrs, short_rpt_amt, last_short_dt, form_code,  end_long_shrs, init_long_shrs, end_long_pct, init_long_pct, avg_purchase_px, avg_sale_px])
 
     
 
@@ -143,7 +168,7 @@ def period_holding_changes(ticker, from_dt, to_dt):
         return
     
     data.sort_values(by='Date', inplace=True)
-    output_data = pd.DataFrame(data=None,columns=['Ticker', 'Investor', 'Long Delta', 'Rpt Purchase Shrs', 'Rpt Purchase Amt', 'Last Rpt Purchase Dt', 'Rpt Sale Shrs', 'Rpt Sale Amt', 'Last Rpt Sale Dt', 'Form Code', 'End Long Shrs', 'Init Long Shrs', 'End Long Pct', 'Init Long Pct'] )
+    output_data = pd.DataFrame(data=None,columns=holdingoutput_columns )
     
     investors = np.unique(data['Investor'])
     for investor in investors:
@@ -172,7 +197,9 @@ def period_holding_changes(ticker, from_dt, to_dt):
                                           'End Long Shrs': investor_holding_summary[8], 
                                           'Init Long Shrs': investor_holding_summary[9], 
                                           'End Long Pct': investor_holding_summary[10],
-                                          'Init Long Pct': investor_holding_summary[11]
+                                          'Init Long Pct': investor_holding_summary[11],
+                                          'Avg. Purchase Px' : investor_holding_summary[12], 
+                                          'Avg. Sale Px' : investor_holding_summary[13] 
                                           }, ignore_index=True)
         
     
@@ -196,7 +223,7 @@ def DailyUpdate():
     to_dt = dt.datetime.today()
     from_dt = to_dt - dt.timedelta(365)
     
-    output_data = pd.DataFrame(data=None,columns=['Ticker', 'Investor', 'Long Delta', 'Rpt Purchase Shrs', 'Rpt Purchase Amt', 'Last Rpt Purchase Dt', 'Rpt Sale Shrs', 'Rpt Sale Amt', 'Last Rpt Sale Dt', 'Form Code', 'End Long Shrs', 'Init Long Shrs', 'End Long Pct', 'Init Long Pct'] )
+    output_data = pd.DataFrame(data=None,columns=holdingoutput_columns  )
     
     tickerfiles = glob(FilingsByTickerDir+ "*.csv")
     tickers = [os.path.splitext(os.path.basename(tickerfile))[0] for tickerfile in tickerfiles]
@@ -212,13 +239,13 @@ def DailyUpdate():
     for form_type in ["Form1", "Form2", "Form3A"]:
         form_data = output_data[output_data['Form Code']==form_type]
         form_data.drop(columns=['Form Code'], inplace=True)
+        form_data.sort_values(by=['Last Rpt Purchase Dt'], ascending=False, inplace=True)
         form_data.to_excel(DIDir+form_type+".xlsx", index=False, engine="openpyxl")
 
     
     
 DailyUpdate()
 
-    
     
     
     
