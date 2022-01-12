@@ -812,8 +812,8 @@ def HKExFilingDailyBatch():
 
 
 
-#HKExFilingDailyBatch()
-#InitializeFundFilings()
+HKExFilingDailyBatch()
+InitializeFundFilings()
 # =============================================================================
 # for i in range(5):
 #     j = 10000

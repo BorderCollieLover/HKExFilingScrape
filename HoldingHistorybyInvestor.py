@@ -212,6 +212,7 @@ def DailyUpdate():
     for form_type in ["Form1", "Form2", "Form3A"]:
         form1_data = output_data[output_data['Form Code']==form_type]
         form1_data.to_csv(DIDir+form_type+".csv", index=False)
+
     
     
 
