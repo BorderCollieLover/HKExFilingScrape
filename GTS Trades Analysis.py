@@ -18,7 +18,7 @@ def trade_analysis_onefile (input_file, output_file):
         trades = pd.read_csv(input_file)
     else:
         if input_file.lower().endswith('.xlsx'):
-            trades = pd.read_excel(input_file)
+            trades = pd.read_excel(input_file, engine="openpyxl")
         else:
             return
     tickers = trades['product_id'].unique()
@@ -63,7 +63,7 @@ def trade_analysis_onefile (input_file, output_file):
             
         }, ignore_index=True)
         
-    trade_summary.to_excel(output_file, index=False)
+    trade_summary.to_excel(output_file, index=False, engine="openpyxl")
 
 def analyze_all_mk_trades(path):
     all_trades = pd.DataFrame()
@@ -79,7 +79,7 @@ def analyze_all_mk_trades(path):
                 
             
                 
-    all_trades.to_excel(path+"\\all_mk_trades.xlsx", index=False)
+    all_trades.to_excel(path+"\\all_mk_trades.xlsx", index=False,engine="openpyxl")
     trade_analysis_onefile(path+"\\all_mk_trades.xlsx",path+"\\all_mk_trades summary.xlsx" )
     
     

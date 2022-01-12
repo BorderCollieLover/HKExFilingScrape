@@ -118,7 +118,7 @@ def analyze_one_investor_history(investor_data):
                 if ('Form3A' in form_url):
                     form_code = 'Form3A'
                     
-    print([long_changes, long_rpt_shrs, long_rpt_amt,  last_long_dt, short_rpt_shrs, short_rpt_amt, last_short_dt, form_code,  end_long_shrs, init_long_shrs, end_long_pct, init_long_pct])
+    #print([long_changes, long_rpt_shrs, long_rpt_amt,  last_long_dt, short_rpt_shrs, short_rpt_amt, last_short_dt, form_code,  end_long_shrs, init_long_shrs, end_long_pct, init_long_pct])
     return([long_changes, long_rpt_shrs, long_rpt_amt,  last_long_dt, short_rpt_shrs, short_rpt_amt, last_short_dt, form_code,  end_long_shrs, init_long_shrs, end_long_pct, init_long_pct])
 
     
@@ -143,7 +143,7 @@ def period_holding_changes(ticker, from_dt, to_dt):
         return
     
     data.sort_values(by='Date', inplace=True)
-    output_data = pd.DataFrame(data=None,columns=['Ticker', 'Investor', 'Long Delta', 'Rpt Purchase Shrs', 'Rpt Purchase Amt', 'Last Rpt Purchase Dt', 'Rpt Sale Shrs', 'Rpt Sale Amt', 'Last Rpt Sale Date', 'Form Code', 'End Long Shrs', 'Init Long Shrs', 'End Long Pct', 'Init Long Pct'] )
+    output_data = pd.DataFrame(data=None,columns=['Ticker', 'Investor', 'Long Delta', 'Rpt Purchase Shrs', 'Rpt Purchase Amt', 'Last Rpt Purchase Dt', 'Rpt Sale Shrs', 'Rpt Sale Amt', 'Last Rpt Sale Dt', 'Form Code', 'End Long Shrs', 'Init Long Shrs', 'End Long Pct', 'Init Long Pct'] )
     
     investors = np.unique(data['Investor'])
     for investor in investors:
@@ -157,7 +157,7 @@ def period_holding_changes(ticker, from_dt, to_dt):
         # reported sell shares; reported sell price 
         # last reported buy date 
         # last reported sell date 
-        print(investor_data)
+        #print(investor_data)
         investor_holding_summary =  analyze_one_investor_history(investor_data)
         output_data = output_data.append({'Ticker': ticker, 
                                           'Investor' : investor,
@@ -196,13 +196,13 @@ def DailyUpdate():
     to_dt = dt.datetime.today()
     from_dt = to_dt - dt.timedelta(365)
     
-    output_data = pd.DataFrame(data=None,columns=['Ticker', 'Investor', 'Long Delta', 'Rpt Purchase Shrs', 'Rpt Purchase Amt', 'Last Rpt Purchase Dt', 'Rpt Sale Shrs', 'Rpt Sale Amt', 'Last Rpt Sale Date', 'Form Code', 'End Long Shrs', 'Init Long Shrs', 'End Long Pct', 'Init Long Pct'] )
+    output_data = pd.DataFrame(data=None,columns=['Ticker', 'Investor', 'Long Delta', 'Rpt Purchase Shrs', 'Rpt Purchase Amt', 'Last Rpt Purchase Dt', 'Rpt Sale Shrs', 'Rpt Sale Amt', 'Last Rpt Sale Dt', 'Form Code', 'End Long Shrs', 'Init Long Shrs', 'End Long Pct', 'Init Long Pct'] )
     
     tickerfiles = glob(FilingsByTickerDir+ "*.csv")
     tickers = [os.path.splitext(os.path.basename(tickerfile))[0] for tickerfile in tickerfiles]
     
     for ticker in tickers:
-        print(ticker)
+        #print(ticker)
         ticker_data = period_holding_changes(ticker, from_dt, to_dt)
         output_data = pd.concat([output_data, ticker_data], ignore_index=True)
         
@@ -210,13 +210,14 @@ def DailyUpdate():
     #write out the data:
     output_data.to_csv(DIDir+to_dt.strftime("%Y%m%d")+".csv", index=False)
     for form_type in ["Form1", "Form2", "Form3A"]:
-        form1_data = output_data[output_data['Form Code']==form_type]
-        form1_data.to_csv(DIDir+form_type+".csv", index=False)
+        form_data = output_data[output_data['Form Code']==form_type]
+        form_data.drop(columns=['Form Code'], inplace=True)
+        form_data.to_excel(DIDir+form_type+".xlsx", index=False, engine="openpyxl")
 
     
     
+DailyUpdate()
 
-    
     
     
     

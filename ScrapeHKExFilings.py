@@ -554,7 +554,7 @@ def ScrapeInvestorInfo(formUrl):
                     chinameID = directorID.find('span', attrs={'id': "lblDChiName"})
                     if chinameID:
                         directorName = chinameID.text
-                        print(directorName)
+                        #print(directorName)
                         directorName = FTM.CleanString(directorName)
                     directorID = directorID.parent
                     upCtr += 1
