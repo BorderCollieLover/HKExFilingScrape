@@ -17,6 +17,8 @@ import os
 HKFilingsDir = "X:\\HKExFilings\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 DIDir = HKFilingsDir + "DI\\"
+HKStockInfoDir = HKFilingsDir + "StockInfo\\"
+Stock_Info_File = HKFilingsDir + "StockInfo\\" + "HKSecuritiesData.csv"
 
 #ticker = '00868'
 #to_dt = dt.datetime.today()
@@ -218,7 +220,24 @@ def test_run_all(dt1, dt2):
     for ticker in tickers:
         print(ticker)
         period_holding_changes(ticker, dt1, dt2)
+    return
         
+
+def MarketCap_Liquidity_Filter(ticker_list):
+    data = pd.read_csv(Stock_Info_File, index_col=0)
+    data = data[['marketCap', 'averageVolume', 'fiftyDayAverage']]
+    data['hasna'] = [(np.isnan(data.loc[ticker,'marketCap']) or np.isnan(data.loc[ticker,'averageVolume']) or np.isnan(data.loc[ticker,'fiftyDayAverage'])) for ticker in data.index]
+    data = data[data['hasna'] == False]
+    
+    data['marketcap1b'] = [(data.loc[ticker, 'marketCap']>1000000000) for ticker in data.index]
+    data=data[data['marketcap1b'] == True]
+    
+    data['turnover1m'] = [(data.loc[ticker, 'averageVolume']*data.loc[ticker, 'fiftyDayAverage']>1000000) for ticker in data.index]
+    data=data[data['turnover1m'] == True]
+    
+    tickers_in_data = ["0"+ticker[:4] for ticker in data.index]
+    return(list(set(ticker_list).intersection(set(tickers_in_data))))
+
 def DailyUpdate():
     to_dt = dt.datetime.today()
     from_dt = to_dt - dt.timedelta(365)
@@ -227,8 +246,10 @@ def DailyUpdate():
     
     tickerfiles = glob(FilingsByTickerDir+ "*.csv")
     tickers = [os.path.splitext(os.path.basename(tickerfile))[0] for tickerfile in tickerfiles]
+    filtered_tickers = MarketCap_Liquidity_Filter(tickers)
     
-    for ticker in tickers:
+    
+    for ticker in filtered_tickers:
         #print(ticker)
         ticker_data = period_holding_changes(ticker, from_dt, to_dt)
         output_data = pd.concat([output_data, ticker_data], ignore_index=True)

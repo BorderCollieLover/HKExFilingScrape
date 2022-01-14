@@ -53,33 +53,28 @@ stock_info.tickers['0005.HK']
 list_of_dics = [ stock_info.tickers[ticker].info for ticker in tickers]
 equity_data = pd.DataFrame(list_of_dics)
 equity_data.index = tickers 
-equity_data.to_excel(HKStockInfoDir+ "HKSecuritiesData.xlsx")
-equity_data.to_excel(HKStockInfoDir+ "HKSecuritiesData " + datetime.datetime.today().strftime("%Y%m%d")+".xlsx")
+#to_excel run into 'DataFrame' object has no attribute 'data' problem
+equity_data.to_csv(HKStockInfoDir+ "HKSecuritiesData.csv")
+equity_data.to_csv(HKStockInfoDir+ "Archive\\HKSecuritiesData " + datetime.datetime.today().strftime("%Y%m%d")+".csv")
+equity_data.to_excel(HKStockInfoDir+ "HKSecuritiesData.xlsx",engine="openpyxl")
+equity_data.to_excel(HKStockInfoDir+ "Archive\\HKSecuritiesData " + datetime.datetime.today().strftime("%Y%m%d")+".xlsx",engine="openpyxl")
 
 
+# This is tested for breaking data down into blocks but it seems the above method works -- just taking a long time
+# block_num = 100
+# block_size = len(data.index)// block_num
 
-
-    # try:
-    #     print(ticker, stock_info.tickers[ticker].info['industry'])
-    #     data.iloc[i]['Industry'] = stock_info.tickers[ticker].info['industry']
-    # except Exception as e:
-    #     print(ticker, e)
-    #     data.iloc[i]['Industry'] = ''
-        
-    # try:
-    #     print(ticker, stock_info.tickers[ticker].info['industry'])
-    #     data.iloc[i]['Industry'] = stock_info.tickers[ticker].info['industry']
-    # except Exception as e:
-    #     print(ticker, e)
-    #     data.iloc[i]['Industry'] = ''
-        
+# for i in range(block_num):
+#     if i== block_num -1 : 
+#         ticker_set = tickers[i*block_size:(len(data.index)-1)]
+#     else:
+#         ticker_set = tickers[i*block_size:((i+1)*block_size-1)]
     
+#     list_of_dics = [ stock_info.tickers[ticker].info for ticker in ticker_set]
     
+#     equity_data = pd.DataFrame(list_of_dics)
+#     equity_data.index = ticker_set
     
-        
-    
-        
+#     equity_data.to_excel(HKStockInfoDir+ str(i) + " HKSecuritiesData.xlsx",engine="openpyxl")
+#     equity_data.to_excel(HKStockInfoDir+ str(i) + " HKSecuritiesData " + datetime.datetime.today().strftime("%Y%m%d")+".xlsx",engine="openpyxl")
 
-#data['Industry'] = stock_industry
-
-#output_data = data[['Stock Code', 'Name of Securities', 'Industry']]
