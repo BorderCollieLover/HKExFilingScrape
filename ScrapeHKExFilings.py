@@ -23,8 +23,8 @@ import FileToolsModule as FTM
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 #HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
-HKFilingsDir = "X:\\HKExFilings\\"
-#HKFilingsDir = "D:\\HKEx\\"
+#HKFilingsDir = "X:\\HKExFilings\\"
+HKFilingsDir = "D:\\HKEx\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 FilingsByFundDir = HKFilingsDir + "FilingsByFund\\"
 BackupDir =  HKFilingsDir + "Backup\\"
@@ -583,7 +583,7 @@ def ScrapeOneHKExFiling(formID, filingurl, filingDtIn, filingCode, longshortCode
         return None
 
     soup = BeautifulSoup(filingpage)
-    print(soup)
+    #print(soup)
     #1. Look for stock code:
     lines = soup.findAll('span', attrs={'id': "lblDStockCode"})
     if lines:
