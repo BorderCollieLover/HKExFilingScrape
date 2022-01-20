@@ -14,8 +14,8 @@ import datetime as dt
 from glob import glob
 import os
 
-#HKFilingsDir = "X:\\HKExFilings\\"
-HKFilingsDir = "D:\\HKEx\\"
+HKFilingsDir = "X:\\HKExFilings\\"
+#HKFilingsDir = "D:\\HKEx\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 DIDir = HKFilingsDir + "DI\\"
 HKStockInfoDir = HKFilingsDir + "StockInfo\\"
@@ -257,7 +257,7 @@ def DailyUpdate():
         
         
     #write out the data:
-    output_data.to_csv(DIDir+to_dt.strftime("%Y%m%d")+".csv", index=False)
+    output_data.to_csv(DIDir+"Archive\\"+to_dt.strftime("%Y%m%d")+".csv", index=False)
     for form_type in ["Form1", "Form2", "Form3A"]:
         form_data = output_data[output_data['Form Code']==form_type]
         form_data.drop(columns=['Form Code'], inplace=True)

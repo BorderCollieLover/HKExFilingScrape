@@ -16,15 +16,15 @@ import numpy as np
 
 
 
-import sys
+#import sys
 #sys.path.append("c:\\users\\mtang\\Documents\\Research\\HKExFilingScrape\\")
 import FileToolsModule as FTM
 #from HKExBuybackSummary import HKFilingsDir, DownloadBuyBackReports, UpdateAnnualBuyBackData, BuybackSummaryfromFile
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 #HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
-#HKFilingsDir = "X:\\HKExFilings\\"
-HKFilingsDir = "D:\\HKEx\\"
+HKFilingsDir = "X:\\HKExFilings\\"
+#HKFilingsDir = "D:\\HKEx\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 FilingsByFundDir = HKFilingsDir + "FilingsByFund\\"
 BackupDir =  HKFilingsDir + "Backup\\"
@@ -841,7 +841,7 @@ InitializeFundFilings()
 #UpdateFundsfromTickerFile(HKFunds, "00000")
 #DailyScrapeHKExFilings()
 #UpdateFilingList2Scrape()
-result = ScrapeOneHKExFiling("00000", "https://di.hkex.com.hk/di/NSForm1.aspx?fn=IS20170830E00004", "000000", "000000", "000000")
+#result = ScrapeOneHKExFiling("00000", "https://di.hkex.com.hk/di/NSForm1.aspx?fn=IS20170830E00004", "000000", "000000", "000000")
 #ScrapeOneHKExFiling("00000", "http://sdinotice.hkex.com.hk/di/NSForm2.aspx?fn=CS20180328E00109", "000000", "000000", "000000")
 # This really should be run just once to create the FullScrapingList when first started collecting data.
 # The FullScrapingList is subsequently updated in daily runs

@@ -5,19 +5,8 @@ Created on Wed Jan 12 14:44:09 2022
 @author: mtang
 """
 
-from bs4 import BeautifulSoup
-from urllib.request import urlopen
 import datetime
-import re
-import csv
-import os
 import pandas as pd
-from urllib.error import URLError, HTTPError
-from operator import itemgetter
-import locale
-import shutil
-from glob import glob
-import numpy as np
 import yfinance as yf
 
 HKFilingsDir = "X:\\HKExFilings\\"
@@ -50,6 +39,7 @@ stock_info.tickers['0005.HK']
                 
 #small_tickers = tickers[:10]
 #list_of_dics = [ stock_info.tickers[ticker].info for ticker in small_tickers]
+print('here')
 list_of_dics = [ stock_info.tickers[ticker].info for ticker in tickers]
 equity_data = pd.DataFrame(list_of_dics)
 equity_data.index = tickers 
