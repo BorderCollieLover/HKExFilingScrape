@@ -9,7 +9,7 @@ import datetime
 import pandas as pd
 import yfinance as yf
 
-HKFilingsDir = "X:\\HKExFilings\\"
+HKFilingsDir = "V:\\HKExFilings\\"
 HKStockInfoDir = HKFilingsDir + "StockInfo\\"
 
 data = pd.read_excel(HKStockInfoDir+ "ListofSecurities.xlsx")
