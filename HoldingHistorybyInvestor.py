@@ -230,10 +230,10 @@ def MarketCap_Liquidity_Filter(ticker_list):
     data['hasna'] = [(np.isnan(data.loc[ticker,'marketCap']) or np.isnan(data.loc[ticker,'averageVolume']) or np.isnan(data.loc[ticker,'fiftyDayAverage'])) for ticker in data.index]
     data = data[data['hasna'] == False]
     
-    data['marketcap1b'] = [(data.loc[ticker, 'marketCap']>1000000000) for ticker in data.index]
+    data['marketcap1b'] = [(data.loc[ticker, 'marketCap']>3000000000) for ticker in data.index]
     data=data[data['marketcap1b'] == True]
     
-    data['turnover1m'] = [(data.loc[ticker, 'averageVolume']*data.loc[ticker, 'fiftyDayAverage']>1000000) for ticker in data.index]
+    data['turnover1m'] = [(data.loc[ticker, 'averageVolume']*data.loc[ticker, 'fiftyDayAverage']>2500000) for ticker in data.index]
     data=data[data['turnover1m'] == True]
     
     tickers_in_data = ["0"+ticker[:4] for ticker in data.index]
@@ -244,6 +244,7 @@ def DailyUpdate():
     from_dt = to_dt - dt.timedelta(365)
     
     output_data = pd.DataFrame(data=None,columns=holdingoutput_columns  )
+    output_data2 = pd.DataFrame(data=None,columns=holdingoutput_columns  )
     
     tickerfiles = glob(FilingsByTickerDir+ "*.csv")
     tickers = [os.path.splitext(os.path.basename(tickerfile))[0] for tickerfile in tickerfiles]
@@ -255,6 +256,7 @@ def DailyUpdate():
         ticker_data = period_holding_changes(ticker, from_dt, to_dt)
         output_data = pd.concat([output_data, ticker_data], ignore_index=True)
         
+    
         
     #write out the data:
     output_data.to_csv(DIDir+"Archive\\"+to_dt.strftime("%Y%m%d")+".csv", index=False)
@@ -263,6 +265,22 @@ def DailyUpdate():
         form_data.drop(columns=['Form Code'], inplace=True)
         form_data.sort_values(by=['Last Rpt Purchase Dt'], ascending=False, inplace=True)
         form_data.to_excel(DIDir+form_type+".xlsx", index=False, engine="openpyxl")
+        
+        
+    tickers2 = list(set(tickers)-set(filtered_tickers))
+    for ticker in tickers2:
+        #print(ticker)
+        ticker_data = period_holding_changes(ticker, from_dt, to_dt)
+        output_data = pd.concat([output_data, ticker_data], ignore_index=True)
+        
+    output_data.to_csv(DIDir+"Archive\\AllCap\\"+to_dt.strftime("%Y%m%d")+".csv", index=False)
+    for form_type in ["Form1", "Form2", "Form3A"]:
+        form_data = output_data[output_data['Form Code']==form_type]
+        form_data.drop(columns=['Form Code'], inplace=True)
+        form_data.sort_values(by=['Last Rpt Purchase Dt'], ascending=False, inplace=True)
+        form_data.to_excel(DIDir+"AllCap\\"+form_type+".xlsx", index=False, engine="openpyxl")
+    
+    
 
     
     
