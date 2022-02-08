@@ -11,7 +11,7 @@ import datetime
 import numpy as np
 import requests
 from pandas.tseries.offsets import BDay
-import yfinance as yf
+
 
 
 #Notes on the data:
@@ -22,14 +22,16 @@ import yfinance as yf
 #kind of random, usually row 6, 8 or 14 in the spreadsheet
 
 
-#rptName = '/Users/shared/HKEx/Repurchase/20151106.xls'
-rptName = '/Users/shared/HKEx/Repurchase/20060214.xls'
-rptName = '/Users/shared/HKEx/Repurchase/20111216.xls'
-rptName = '/Users/shared/HKEx/Repurchase/20120102.xls'
-rptName = '/Users/shared/HKEx/Repurchase/20080822.xls'
-rptName = 'c:\\users\\mtang\\HKEx\\Repurchase\\20210603.xls'
-HKFilingsDir = "V:\\HKExFilings\\"
-#HKFilingsDir = "D:\\HKEx\\"
+# rptName = '/Users/shared/HKEx/Repurchase/20151106.xls'
+# rptName = '/Users/shared/HKEx/Repurchase/20060214.xls'
+# rptName = '/Users/shared/HKEx/Repurchase/20111216.xls'
+# rptName = '/Users/shared/HKEx/Repurchase/20120102.xls'
+# rptName = '/Users/shared/HKEx/Repurchase/20080822.xls'
+# rptName = 'c:\\users\\mtang\\HKEx\\Repurchase\\20210603.xls'
+
+DriveName = "V:"
+HKFilingsDir = DriveName+"\\HKExFilings\\"
+StockTradeSheetRootDir = DriveName+"\\Daily\\"
 
 BuyBackSummaryFile = HKFilingsDir + "BuybackSummary.csv"
 AllBuyBackSummaryFile = HKFilingsDir + "AllBuybackSummary.csv"
@@ -37,6 +39,7 @@ BuyBackSnapshotFile = HKFilingsDir + "BuybackSnapshot.csv"
 BuybackTickerFile = HKFilingsDir + "Snapshots\\tickers.csv"
 AggregatedBuybackDataFile =  HKFilingsDir +"DailyBuybackStats.csv"
 
+ohlc_path = StockTradeSheetRootDir + "OHLC\\"
 
 
 
@@ -436,9 +439,11 @@ def AggregatedBuybackStatistics(filename=BuyBackSummaryFile):
     #for i in range(10):
         if (output_data.loc[i]['Currency'] == 'HKD'):
             try:
-                stock = yf.Ticker(output_data.loc[i]['Ticker'])
+                #stock = yf.Ticker(output_data.loc[i]['Ticker'])
                 #print(stock)
-                output_data.at[i,'Current Price'] = stock.info['regularMarketPrice']
+                stock = pd.read_csv(ohlc_path+ output_data.loc[i]['Ticker']+".csv")
+                
+                output_data.at[i,'Current Price'] = stock.iloc[-1]["close"]
                 output_data.at[i,'Current Price Premium'] = np.log(output_data.loc[i]['Current Price']/output_data.loc[i]['Average Price'])
                 #print(stock)
             except Exception as e:

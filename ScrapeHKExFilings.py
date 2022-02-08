@@ -16,15 +16,13 @@ import numpy as np
 
 
 
-#import sys
-#sys.path.append("c:\\users\\mtang\\Documents\\Research\\HKExFilingScrape\\")
 import FileToolsModule as FTM
-#from HKExBuybackSummary import HKFilingsDir, DownloadBuyBackReports, UpdateAnnualBuyBackData, BuybackSummaryfromFile
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
-#HKFilingsDir = "c:\\users\\mtang\\HKEx\\"
-HKFilingsDir = "V:\\HKExFilings\\"
-#HKFilingsDir = "D:\\HKEx\\"
+
+
+DriveName = "V:"
+HKFilingsDir = DriveName+"\\HKExFilings\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 FilingsByFundDir = HKFilingsDir + "FilingsByFund\\"
 BackupDir =  HKFilingsDir + "Backup\\"

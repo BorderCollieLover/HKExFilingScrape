@@ -14,8 +14,8 @@ import datetime as dt
 from glob import glob
 import os
 
-HKFilingsDir = "V:\\HKExFilings\\"
-#HKFilingsDir = "D:\\HKEx\\"
+DriveName = "V:"
+HKFilingsDir = DriveName+"\\HKExFilings\\"
 FilingsByTickerDir = HKFilingsDir + "FilingsByTicker\\"
 DIDir = HKFilingsDir + "DI\\"
 HKStockInfoDir = HKFilingsDir + "StockInfo\\"
