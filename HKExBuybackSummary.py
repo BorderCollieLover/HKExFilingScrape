@@ -268,7 +268,7 @@ def UpdateAnnualBuyBackData():
 
 
 def UpdateAllBuyBackData():
-    scrapingdts = pd.bdate_range(start= datetime.today() - datetime.timedelta(days=365), end=datetime.datetime.now()).tolist()
+    scrapingdts = pd.bdate_range(start= datetime.datetime.today() - datetime.timedelta(days=365), end=datetime.datetime.now()).tolist()
     x = []    
     for scrapingdt in scrapingdts:
         tmp = ReadOneReport(HKFilingsDir + "Repurchase\\"+scrapingdt.strftime('%Y%m%d')+'.xls')
@@ -277,7 +277,26 @@ def UpdateAllBuyBackData():
     for scrapingdt in scrapingdts:
         tmp = ReadOneReport(HKFilingsDir + "GEMRepurchase\\"+scrapingdt.strftime('%Y%m%d')+'.xls')
         x += tmp
+    #BuybackHeader = ['Company', 'Ticker', 'Stock Type', 'Trade Date', 'Number of Shares', 'Last Buyback High Price', 'Last Buyback Low Price', 'Last Buyback Total',
+    #              'Method of Purchase', 'YTD Shares', 'YTD %']
+    
+    #BuybackData = pd.read_csv(AllBuyBackSummaryFile)    
+    
+    if os.path.isfile(AllBuyBackSummaryFile):
+        try:
+            with open(AllBuyBackSummaryFile, encoding='utf-8') as f:
+                tmpData = [tuple(line) for line in csv.reader(f)]
+            x = tmpData + x 
+        except Exception as e: 
+            print(e)
+    
     DumpTable(x, AllBuyBackSummaryFile)
+    
+    # do this again to remove duplicated entries
+    with open(AllBuyBackSummaryFile, encoding='utf-8') as f:
+        tmpData = [tuple(line) for line in csv.reader(f)]
+    DumpTable(x, AllBuyBackSummaryFile)
+    
     return # end
 
 def BuybackSummaryfromFile(filename=BuyBackSummaryFile):
@@ -458,5 +477,4 @@ DownloadBuyBackReports()
 UpdateAnnualBuyBackData()
 BuybackSummaryfromFile()
 AggregatedBuybackStatistics()
-
-#UpdateAllBuyBackData()
+UpdateAllBuyBackData()
