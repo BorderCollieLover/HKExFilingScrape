@@ -46,6 +46,9 @@ shashares = [ str(x).zfill(6)+".SS" for x in stock_codes]
 ashares = sorted(list(szashares)+list(shashares))
 
 
+USStockInfoDir = DriveName + "\\Daily\\USTickers\\"
+data = pd.read_csv(USStockInfoDir+ "USTickers.csv", header=None)
+ustickers = list(data[0])
 def GetHKExDatafromYF(tickers, filename):
     #tickers = tickers[:10]
     stock_info = yf.Tickers(tickers)
@@ -95,6 +98,11 @@ except Exception as e:
 
 try:
     GetHKExDatafromYF(shashares, "SHSecuritiesData")
+except Exception as e: 
+    print(e)
+
+try:
+    GetHKExDatafromYF(ustickers, "USSecuritiesData")
 except Exception as e: 
     print(e)
 
