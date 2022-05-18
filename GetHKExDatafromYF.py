@@ -75,7 +75,7 @@ def GetHKExDatafromYF(tickers, filename):
     equity_data.to_excel(HKStockInfoDir+ "Archive\\" + filename + " " + datetime.datetime.today().strftime("%Y%m%d")+".xlsx",engine="openpyxl")
     return equity_data
 
-
+# print(ustickers[:20])
 try:
     GetHKExDatafromYF(stocks, "HKSecuritiesData")
 except Exception as e: 
