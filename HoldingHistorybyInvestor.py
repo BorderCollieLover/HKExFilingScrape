@@ -204,6 +204,25 @@ def period_holding_changes(ticker, from_dt, to_dt):
                                           'Avg. Purchase Px' : investor_holding_summary[12], 
                                           'Avg. Sale Px' : investor_holding_summary[13] 
                                           }, ignore_index=True)
+# =============================================================================
+#         new_data = pd.DataFrame([[investor,
+#                                  investor_holding_summary[0],  
+#                                  investor_holding_summary[1],
+#                                  investor_holding_summary[2],
+#                                  investor_holding_summary[3],
+#                                  investor_holding_summary[4],
+#                                  investor_holding_summary[5],
+#                                  investor_holding_summary[6],
+#                                  investor_holding_summary[7],
+#                                  investor_holding_summary[8],
+#                                  investor_holding_summary[9],
+#                                  investor_holding_summary[10],
+#                                  investor_holding_summary[11],
+#                                  investor_holding_summary[12],
+#                                  investor_holding_summary[13],
+#                                  ]],columns = holdingoutput_columns )
+#         pd.concat([output_data, new_data])
+# =============================================================================
         
     
     return(output_data)

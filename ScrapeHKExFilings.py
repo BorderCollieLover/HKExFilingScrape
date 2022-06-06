@@ -13,7 +13,8 @@ import locale
 import shutil
 from glob import glob
 import numpy as np
-
+import time
+from random import randrange
 
 
 import FileToolsModule as FTM
@@ -289,10 +290,12 @@ def RemovedScrapedFilings(filinglist):
         except Exception as e:
             print(e)
             return(filinglist)
+        
+        #tmpData = [line[0] for line in tmpData]
 
-        curData = set(tmpData)
+        curData = set([line[0] for line in tmpData])
         for line in filinglist:
-            if not (line in curData):
+            if not (line[0] in curData):
                 outputList += [line]
 
         return(outputList)
@@ -301,6 +304,8 @@ def RemovedScrapedFilings(filinglist):
 
 
 def CheckFilingListAgainstErrorLog(filinglist):
+    #here is really a comparison of url versus url in error logs 
+    #ID is a misnomer here 
     if (filinglist is None) or (len(filinglist)<1):
         return None
 
@@ -354,19 +359,28 @@ def RetrieveFilingListfromUrl(listurl, urlheader):
     lines = soup.findAll('td', attrs={'class' : "tbCell"})
     #print(lines)
     outputList = []
+    #print(lines)
     for line in lines:
         #print(line)
         tmpHREF = line.find_all('a')
+        #print(tmpHREF)
         if tmpHREF:
             for tmpRef in tmpHREF:
                 formID = tmpRef.string
                 formUrl = filingheader+tmpRef['href']
                 if (len(formID)>13):
+                    
                     # To do:
                     # 1. Identify the position of the formID is formUrl, and truncate the the formUrl to get a consistent and concise URL for the form
                     # 2. Look for filing code, e.g. 103
                     #simpleUrl = formUrl[:formUrl.index(formID)]+formID
-                    simpleUrl = formUrl[:formUrl.index("&")]
+                    #print(formID)
+                    
+                    #Min Tang, 2022.06.06
+                    #Keep the full link instead of the short/simple url that contains only formID due to changes on HXEx
+                    #simpleUrl = formUrl[:formUrl.index("&")]
+                    simpleUrl = formUrl
+                    #print(simpleUrl)
                     filingDt = line.next_sibling.string
                     tmpfilingCode = line.next_sibling.next_sibling.next_sibling.next_sibling.text
                     if tmpfilingCode.find("("):
@@ -379,6 +393,11 @@ def RetrieveFilingListfromUrl(listurl, urlheader):
 
     outputList = list(set(outputList))
     return(outputList)
+
+#list_url_1 = "https://di.hkex.com.hk/di/NSAllFormDateList.aspx?sa1=da&scsd=28%2f05%2f2022&sced=02%2f06%2f2022&src=MAIN&lang=EN&pg=2"
+#urlheader2 = "http://di.hkex.com.hk/di/NSAllFormDateList.aspx?sa1=da&scsd="
+
+#tmp = RetrieveFilingListfromUrl(list_url_1, urlheader2)
 
 
 def RetrieveFilingsList(urlheader, startDt, endDt):
@@ -404,6 +423,7 @@ def RetrieveFilingsList(urlheader, startDt, endDt):
         pageCtr +=1
         pagelisturl = listurl + '&pg=' + str(pageCtr)
         print(pageCtr)
+        time.sleep(randrange(1,3))
 
     FilingList = list(set(FilingList))
     return(FilingList)
@@ -665,13 +685,23 @@ def ScrapeHKExFilingsfromList(targetList):
             #scrapedIDs += [(target[0],)]
         else:
             residualList += [target]
+            
+        time.sleep(randrange(1,3))
     return((scrapeResults, residualList))
+
+
+#1. Generate filings list for given dates [(formID, simpleUrl, filingDt, filingCode, longshortCode),
+#2. Remove filings that are already scraped by calling RemovedScrapedFilings,
+#3. Then check against Error log by calling 
 
 def ScrapeHKExFilingsbyDates(startDt, endDt):
     #1. generate target list:
-    urlheader = "http://sdinotice.hkex.com.hk/di/NSAllFormDateList.aspx?sa1=da&scsd="
+    
+    #urlheader = "http://sdinotice.hkex.com.hk/di/NSAllFormDateList.aspx?sa1=da&scsd="
+    urlheader = "http://di.hkex.com.hk/di/NSAllFormDateList.aspx?sa1=da&scsd="
     filinglist1 = RetrieveFilingsList(urlheader, startDt, endDt)
-    urlheader = "http://sdinotice.hkex.com.hk/filing/di/NSAllFormDateList.aspx?sa1=da&scsd="
+    #urlheader = "http://sdinotice.hkex.com.hk/filing/di/NSAllFormDateList.aspx?sa1=da&scsd="
+    urlheader = "http://di.hkex.com.hk/filing/di/NSAllFormDateList.aspx?sa1=da&scsd="
     filinglist2 = RetrieveFilingsList(urlheader, startDt, endDt)
 
     if (filinglist2 is None):
@@ -692,6 +722,8 @@ def ScrapeHKExFilingsbyDates(startDt, endDt):
          return None
     else:
          print(str(len(filinglist)) + " to scrape.")
+    #print(filinglist)
+    #return
     filinglist = CheckFilingListAgainstErrorLog(filinglist)
     if (filinglist is None) or (len(filinglist) < 1):
         print('Nothing to scrape excluding known errors. ')
@@ -729,7 +761,7 @@ def DailyScrapeHKExFilings():
     BackupImportantFiles()
 
     #2. Scrape recent filings
-    scrapingdts = pd.bdate_range(end=datetime.datetime.now(), periods=40).tolist()
+    scrapingdts = pd.bdate_range(end=datetime.datetime.now(), periods=30).tolist()
     outputData = ScrapeHKExFilingsbyDates(scrapingdts[0], scrapingdts[(len(scrapingdts)-1)])
 
     #3. Create today's snapshots and clean up
@@ -826,6 +858,8 @@ InitializeFundFilings()
 #     ScrapeHistoricalHKExFilings(10000)
 #     ScrapeHistoricalHKExFilings(10000)
 # =============================================================================
+
+
 
 
 
