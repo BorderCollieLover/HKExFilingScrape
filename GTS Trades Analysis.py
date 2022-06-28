@@ -8,8 +8,8 @@ Created on Thu Dec 23 14:52:33 2021
 import pandas as pd
 #import xlwt
 
-input_file = "V:\\10237 2021 Trades.csv"
-output_file = "V:\\10237 2021 Trade Summary.csv"
+input_file = "V:\\10111Trades\\C10111 trade history.xlsx"
+output_file = "V:\\10111Trades\\Summary20220621.xlsx"
 
 all_mk_accts = ['00005', '00006', '10040', '10041', '10123']
 
@@ -34,8 +34,11 @@ def trade_analysis_onefile (input_file, output_file):
         s_data = trade_data[trade_data['bs_flag']=='S']
         long_position = sum(b_data['qty'])
         short_position = sum(s_data['qty'])
-        long_costs = sum(b_data['gross_amt'])
-        short_proceeds = sum(s_data['gross_amt'])
+        #long_costs = sum(b_data['gross_amt'])
+        #short_proceeds = sum(s_data['gross_amt'])
+        long_costs = sum(b_data['net_amt1'])
+        short_proceeds = sum(s_data['net_amt1'])
+        
         net_position = long_position - short_position
         if (net_position == 0):
             pnl = short_proceeds - long_costs 
@@ -85,5 +88,5 @@ def analyze_all_mk_trades(path):
     
     
 
-    
+trade_analysis_onefile(input_file, output_file)    
 

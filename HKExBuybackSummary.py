@@ -111,8 +111,8 @@ def DownloadBuyBackReports():
         #if os.path.isfile(filename):
         #    curDt = curDt - BDay(1)
         #    continue;
-        
-        fileurl = 'https://www.hkexnews.hk/reports/sharerepur/documents/SRRPT' + curDt.strftime('%Y%m%d') + '.xls'
+        fileurl = 'https://www3.hkexnews.hk/reports/sharerepur/documents/SRRPT' + curDt.strftime('%Y%m%d') + '.xls'
+        #fileurl = 'https://www.hkexnews.hk/reports/sharerepur/documents/SRRPT' + curDt.strftime('%Y%m%d') + '.xls'
     ##    fileurl = 'http://www.hkexnews.hk/reports/sharerepur/documents/' + curDt.strftime('%Y%m%d') + '.pdf'
         print(fileurl)
         try:
